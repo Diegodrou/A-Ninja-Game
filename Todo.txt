@@ -1,0 +1,7 @@
+to do:
+X-animations
+X-create a level editor
+-frame independence
+-fix jump spaming bug
+2-make menu:-menu for chosing a level
+            -animate back ground
