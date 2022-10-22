@@ -15,13 +15,14 @@ window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 display = pygame.Surface(DISPLAY_SIZE)
 clock = pygame.time.Clock()
 font = pygame.font.SysFont('Arial', 18)
-world=World(game_map)
 player=Player(50,0)
 player_speed = player.speed
 #Creation of button instances for menu
 resume_b = Button(10, 10, resume_b_img, 0.50)
 options_b = Button(10, 60, options_b_img,0.50)
 quit_b = Button(10, 110, quit_b_img, 0.50)
+level_1_b = Button(250, 10, lvl_1_b_img, 0.50)
+back_b = Button(10, 360, back_b_img, 0.50)
 
 #Creation of button instances for paused menu
 quit_b_p = Button(270, 120, quit_b_img, 0.50)
@@ -58,20 +59,42 @@ def debug_stats():#Shows stats useful for debugging
     window.blit(player_y_direction_text,(10,60))
     window.blit(player_center_x_text,(10,80))
 
-def scroll_hndler():#Handles world scrolling
-    if player.rect.centerx > 210 and player.direction.x > 0:
-        world.scroll_x(-player_speed)
-        player.speed = 0
-    elif player.rect.centerx < 50 and player.direction.x < 0:
-        world.scroll_x(player_speed)
-        player.speed = 0
-    else:
-        world.scroll_x(0)
-        player.speed = 2
 
-def level_selector():
-    levels_menu = True
+def level_selection_menu():
+    #Menu variables
+    lvl_selector = True
+    anim_index = 0
+    BACKGROUND_ANIM = menu_bimages
+    print(len(BACKGROUND_ANIM))
+    MAIN_MENU_ANIM_COOLDOWN = 150
+    update_time_m =pygame.time.get_ticks()
+    #Menu_Loop
+    while lvl_selector:
+        
+        #Pygame input
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
 
+        #All Draws, and button instances
+        display.blit(pygame.transform.scale(BACKGROUND_ANIM[anim_index],DISPLAY_SIZE),(0,0))
+        window.blit(pygame.transform.scale(display, WINDOW_SIZE), (0,0))
+        if level_1_b.draw(window):
+            lvl_selector = False
+            Game(lvls[0])
+
+        if back_b.draw(window):
+            lvl_selector = False
+            main_menu()
+
+        pygame.display.update()
+        if pygame.time.get_ticks() - update_time_m > MAIN_MENU_ANIM_COOLDOWN:
+            update_time_m = pygame.time.get_ticks()
+            if anim_index >= len(BACKGROUND_ANIM)-1 :#24 frames in the animation
+                anim_index = 0
+            else:
+                anim_index += 1
 
 def main_menu():
     #Menu variables
@@ -94,7 +117,7 @@ def main_menu():
         display.blit(pygame.transform.scale(BACKGROUND_ANIM[anim_index],DISPLAY_SIZE),(0,0))
         window.blit(pygame.transform.scale(display, WINDOW_SIZE), (0,0))
         if resume_b.draw(window):
-            Game()
+            level_selection_menu()
         if options_b.draw(window):
             pass
         if quit_b.draw(window):
@@ -108,13 +131,28 @@ def main_menu():
             else:
                 anim_index += 1
 
-def Game():
+def Game(lvl):
     #Game Variables
     game_pause = False
     fps_toggle = False
     game_run = True 
     SCROLL_TRESH = 550
     bg_scroll = 0
+    #game instances
+    world=World(lvl)
+
+    #Game functions
+    def scroll_hndler():#Handles world scrolling
+        if player.rect.centerx > 210 and player.direction.x > 0:
+            world.scroll_x(-player_speed)
+            player.speed = 0
+        elif player.rect.centerx < 50 and player.direction.x < 0:
+            world.scroll_x(player_speed)
+            player.speed = 0
+        else:
+            world.scroll_x(0)
+            player.speed = 2
+    
     #Game Loop
     while game_run:
         clock.tick(FPS)

@@ -14,7 +14,7 @@ class World():
         
         for row_index,row in enumerate(lvl_layout):
             for col_index,cell in enumerate(row):
-                if cell != '0':
+                if cell != -1:
                     x = col_index * TILE_SIZE
                     y = row_index * TILE_SIZE
                     tile = Tile((x,y))
