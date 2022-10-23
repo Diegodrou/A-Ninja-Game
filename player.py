@@ -25,7 +25,7 @@ class Player(pygame.sprite.Sprite):
             self.animation_list.append(temp_list)
 
         self.image = self.animation_list[self.action][self.index]
-        self.rect = pygame.Rect(spawnpoint_x,spawnpoint_y,self.image.get_width(),self.image.get_height())
+        self.rect = self.image.get_rect(topleft = (spawnpoint_x,spawnpoint_y))
         self.collision_types =  {'top': False, 'bottom': False, 'right': False, 'left': False} # PEP8: spaces
         
         
@@ -38,6 +38,14 @@ class Player(pygame.sprite.Sprite):
         self.moving_left = False
         self.gravity = 0.3
         self.air_timer = 0
+
+        #player status
+        self.on_left = False
+        self.on_right = False
+        
+
+        #debug atributes
+        self.t_rect = False
     
     def movement_collision(self,tile_rects):
         #Horizontal movement
@@ -66,8 +74,12 @@ class Player(pygame.sprite.Sprite):
                     self.direction.y = 0
                     self.collision_types['top'] = True
         
-        if self.direction.y > 0:
+        if self.collision_types['bottom'] and self.direction.y < 0 or self.direction.y > 1 :
             self.collision_types['bottom'] = False
+        
+        if self.collision_types['top'] and self.direction.y > 0:
+            self.collision_types['top'] = False
+
         if self.collision_types['bottom']:
             self.air_timer = 0
         else:
@@ -85,7 +97,6 @@ class Player(pygame.sprite.Sprite):
             self.direction.x  = -1
             
         else:
-            self.flip = False
             self.direction.x = 0
     
                 
@@ -125,6 +136,10 @@ class Player(pygame.sprite.Sprite):
             else:
                     self.update_action(0)#0:idle
 
+        #set rect
+        if self.collision_types['bottom']:
+            self.rect = self.image.get_rect(midbottom = self.rect.midbottom)
+
     def update_action(self, new_action):
         
         #check if new action is different to the previous
@@ -136,3 +151,5 @@ class Player(pygame.sprite.Sprite):
 
     def draw(self,display):
         display.blit(pygame.transform.flip(self.image,self.flip,False),(self.rect.x,self.rect.y))
+        if self.t_rect:
+            pygame.draw.rect(display, (255,0,0), self.rect,  1)

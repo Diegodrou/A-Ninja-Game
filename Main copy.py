@@ -65,7 +65,6 @@ def level_selection_menu():
     lvl_selector = True
     anim_index = 0
     BACKGROUND_ANIM = menu_bimages
-    print(len(BACKGROUND_ANIM))
     MAIN_MENU_ANIM_COOLDOWN = 150
     update_time_m =pygame.time.get_ticks()
     #Menu_Loop
@@ -101,7 +100,6 @@ def main_menu():
     game_menu = True
     anim_index = 0
     BACKGROUND_ANIM = menu_bimages
-    print(len(BACKGROUND_ANIM))
     MAIN_MENU_ANIM_COOLDOWN = 150
     update_time_m =pygame.time.get_ticks()
     #Menu_Loop
@@ -165,6 +163,7 @@ def Game(lvl):
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_BACKSLASH:
                     fps_toggle = not fps_toggle
+                    player.t_rect = not player.t_rect
                 if event.key == pygame.K_ESCAPE:
                     if game_pause:
                         game_pause = False

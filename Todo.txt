@@ -1,7 +1,6 @@
 to do:
-X-animations
+1-fix bug teleporting to top of tile (bug related with animation , watch clear code video)
 X-create a level editor
+-adding spawn points to levels
 -frame independence
--fix jump spaming bug
-2-make menu:-menu for chosing a level
-            -animate back ground
+2-menu for chosing a level
