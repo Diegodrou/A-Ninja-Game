@@ -3,7 +3,7 @@ import os
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, spawnpoint_x, spawnpoint_y):
+    def __init__(self, pos):
         super().__init__()
         self.dead = False
         self.animation_list = []
@@ -25,7 +25,7 @@ class Player(pygame.sprite.Sprite):
             self.animation_list.append(temp_list)
 
         self.image = self.animation_list[self.action][self.index]
-        self.rect = self.image.get_rect(topleft = (spawnpoint_x,spawnpoint_y))
+        self.rect = self.image.get_rect(topleft = pos)
         self.collision_types =  {'top': False, 'bottom': False, 'right': False, 'left': False} # PEP8: spaces
         
         
