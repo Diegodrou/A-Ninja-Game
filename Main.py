@@ -1,3 +1,4 @@
+from turtle import window_height
 import pygame , sys , time
 from pygame.locals import *
 from levelloader import World
@@ -15,6 +16,7 @@ window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 display = pygame.Surface(DISPLAY_SIZE)
 clock = pygame.time.Clock()
 font = pygame.font.SysFont('Arial', 18)
+font2 =pygame.font.SysFont('Arial', 60)
 #Creation of button instances for menu
 resume_b = Button(10, 10, resume_b_img, 0.50)
 options_b = Button(10, 60, options_b_img,0.50)
@@ -24,7 +26,9 @@ back_b = Button(10, 360, back_b_img, 0.50)
 
 #Creation of button instances for paused menu
 quit_b_p = Button(270, 120, quit_b_img, 0.50)
-
+#Creation of button instances for dead menu
+resume_b_d = Button(150,200,resume_b_img, 0.50)
+quit_b_d = Button(200, 240, quit_b_img, 0.50)
 
 #functions for the game
 def level_selection_menu():
@@ -101,10 +105,11 @@ def Game(lvl):
     game_pause = False
     fps_toggle = False
     game_run = True 
-
+    DEAD_MESSAGE ='Sry Bruh U Dead'
+    DEAD_MESSAGE_TEXT = font2.render(DEAD_MESSAGE,1,pygame.Color('Red'))
     #game instances
     world=World(lvl)
-    player=Player(world.spawnpoint(lvl))
+    player=Player(world.spawnpoint(lvl), WINDOW_HEIGHT)
     player_speed = player.speed
 
     #Sprite group creation
@@ -138,7 +143,6 @@ def Game(lvl):
         window.blit(player_x_direction_text,(10,40))
         window.blit(player_y_direction_text,(10,60))
         window.blit(player_center_x_text,(10,80))
-
 
 
     def scroll_hndler():#Handles world scrolling
@@ -189,7 +193,7 @@ def Game(lvl):
         scroll_hndler()
         tile_rects = world.run()
         player.update(tile_rects)
-        player.update_anim()
+        
 
         # - all draws -
 
@@ -212,6 +216,13 @@ def Game(lvl):
             #paused menu buttons
 
             if quit_b_p.draw(window) :
+                main_menu()
+        if player.dead:
+            pygame.draw.rect(window,(255, 120, 219), pygame.Rect(0, 0, 600, 500),0,3)
+            window.blit(DEAD_MESSAGE_TEXT,(80, 60))
+            if resume_b_d.draw(window):
+                Game(lvl)
+            if quit_b_d.draw(window):
                 main_menu()
 
         pygame.display.update()

@@ -1,9 +1,10 @@
+from turtle import window_height
 import pygame
 import os
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, pos):
+    def __init__(self, pos,window_height):
         super().__init__()
         self.dead = False
         self.animation_list = []
@@ -12,7 +13,7 @@ class Player(pygame.sprite.Sprite):
         self.update_time = pygame.time.get_ticks()
         self.flip = False
         self.current_x = 0
-        
+        self.window = window_height
         #load idle anim frames/action 0
         animation_types = ['idle', 'run', 'jump']
         for animation in animation_types:
@@ -119,7 +120,9 @@ class Player(pygame.sprite.Sprite):
              
     def update(self,tile_rects):
         self.get_input()
-        self.movement_collision(tile_rects) 
+        self.movement_collision(tile_rects)
+        self.update_anim()
+        self.check_dead() 
         
     def update_anim(self):
 
@@ -171,6 +174,12 @@ class Player(pygame.sprite.Sprite):
             #update the anim settings
             self.index = 0
             self.update_time = pygame.time.get_ticks()
+    
+    def check_dead(self):
+        if self.rect.y > self.window:
+            self.dead = True
+        else:
+            self.dead = False 
 
     def draw(self,display):
         display.blit(pygame.transform.flip(self.image,self.flip,False),(self.rect.x,self.rect.y))
