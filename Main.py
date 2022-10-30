@@ -1,4 +1,3 @@
-from turtle import window_height
 import pygame , sys , time
 from pygame.locals import *
 from levelloader import World
@@ -134,8 +133,8 @@ def Game(lvl):
         player_x_direction = 'vector_x ='+ str(player.direction.x * player.speed)
         player_x_direction_text = font.render(player_x_direction,1,pygame.Color('white'))
         #pos of the center of the player
-        player_center_x = 'vector_center_x ='+ str(player.rect.centerx)
-        player_center_x_text = font.render(player_x_direction,1,pygame.Color('white'))
+        player_center = 'center ='+ str(player.rect.center)
+        player_center_x_text = font.render(player_center,1,pygame.Color('white'))
 
         window.blit(fps_text,(10,0))
         window.blit(player_pos_x_text,(10,20))
