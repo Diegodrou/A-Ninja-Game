@@ -27,7 +27,8 @@ class Player(pygame.sprite.Sprite):
             self.animation_list.append(temp_list)
 
         self.image = self.animation_list[self.action][self.index]
-        self.rect = self.image.get_rect(topleft = pos)
+        # self.rect = self.image.get_rect(topleft = pos)
+        self.rect = pygame.rect.Rect(0, 0, 15, 15)
         self.collision_types =  {'top': False, 'bottom': False, 'right': False, 'left': False} # PEP8: spaces
         
         
@@ -46,7 +47,7 @@ class Player(pygame.sprite.Sprite):
         
 
         #debug atributes
-        self.t_rect = False
+        self.t_rect = True
     
     def movement_collision(self,tile_rects):
         #Horizontal movement
@@ -147,23 +148,23 @@ class Player(pygame.sprite.Sprite):
             else:
                     self.update_action(0)#0:idle
 
-        #set rect
-        #for bottom collision
-        if self.collision_types['bottom'] and self.collision_types['right']:
-            self.rect = self.image.get_rect(bottomright = self.rect.bottomright)
-        elif self.collision_types['bottom'] and self.collision_types['left']:
-            self.rect = self.image.get_rect(bottomleft = self.rect.bottomleft)
-        elif self.collision_types['bottom']:
-            self.rect = self.image.get_rect(midbottom = self.rect.midbottom)
-        #for top collisions
-        elif self.collision_types['top'] and self.collision_types['right']:
-            self.rect = self.image.get_rect(topright = self.rect.topright)
-        elif self.collision_types['top'] and self.collision_types['left']:
-            self.rect = self.image.get_rect(topleft = self.rect.topleft)
-        #elif self.collision_types['top']:
-        #    self.rect = self.image.get_rect(midtop = self.rect.midtop)
-        elif not self.collision_types['top'] and  not self.collision_types['bottom'] :
-            self.rect = self.image.get_rect(center = self.rect.center)
+        # #set rect
+        # #for bottom collision
+        # if self.collision_types['bottom'] and self.collision_types['right']:
+        #     self.rect = self.image.get_rect(bottomright = self.rect.bottomright)
+        # elif self.collision_types['bottom'] and self.collision_types['left']:
+        #     self.rect = self.image.get_rect(bottomleft = self.rect.bottomleft)
+        # elif self.collision_types['bottom']:
+        #     self.rect = self.image.get_rect(midbottom = self.rect.midbottom)
+        # #for top collisions
+        # elif self.collision_types['top'] and self.collision_types['right']:
+        #     self.rect = self.image.get_rect(topright = self.rect.topright)
+        # elif self.collision_types['top'] and self.collision_types['left']:
+        #     self.rect = self.image.get_rect(topleft = self.rect.topleft)
+        # #elif self.collision_types['top']:
+        # #    self.rect = self.image.get_rect(midtop = self.rect.midtop)
+        # elif not self.collision_types['top'] and  not self.collision_types['bottom'] :
+        #     self.rect = self.image.get_rect(center = self.rect.center)
 
 
     def update_action(self, new_action):
