@@ -108,7 +108,7 @@ def Game(lvl):
     DEAD_MESSAGE_TEXT = font2.render(DEAD_MESSAGE,1,pygame.Color('Red'))
     #game instances
     world=World(lvl)
-    player=Player(world.spawnpoint(lvl), WINDOW_HEIGHT)
+    player=Player(world.spawnpoint(lvl))
     player_speed = player.speed
 
     #Sprite group creation
@@ -143,18 +143,6 @@ def Game(lvl):
         window.blit(player_y_direction_text,(10,60))
         window.blit(player_center_x_text,(10,80))
 
-
-    def scroll_hndler():#Handles world scrolling
-        if player.rect.centerx > 210 and player.direction.x > 0:
-            world.scroll_x(-player_speed)
-            player.speed = 0
-        elif player.rect.centerx < 50 and player.direction.x < 0:
-            world.scroll_x(player_speed)
-            player.speed = 0
-        else:
-            world.scroll_x(0)
-            player.speed = 2
-    
     #Game Loop
     while game_run:
         clock.tick(FPS)
@@ -189,15 +177,13 @@ def Game(lvl):
                     player.moving_left = False
             
         #all_sprite updates
-        scroll_hndler()
         tile_rects = world.run()
-        player.update(tile_rects)
-        
-
+        screen_scroll = player.movementANDcollisions(tile_rects)
+        player.update()
         # - all draws -
 
         display.blit(pygame.transform.scale(city_background,DISPLAY_SIZE),(0,0))
-        world.draw(display)
+        world.draw(display,screen_scroll)
 
         for item in all_sprites:
             item.draw(display)

@@ -4,7 +4,7 @@
 			"path": "."
 		},
 		{
-			"path": "../Level Editor"
+			"path": "../../Level Editor"
 		}
 	],
 	"settings": {},

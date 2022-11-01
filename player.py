@@ -2,9 +2,11 @@ from turtle import window_height
 import pygame
 import os
 
+from settings import WINDOW_SIZE
+
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, pos,window_height):
+    def __init__(self, pos):
         super().__init__()
         self.dead = False
         self.animation_list = []
@@ -13,7 +15,7 @@ class Player(pygame.sprite.Sprite):
         self.update_time = pygame.time.get_ticks()
         self.flip = False
         self.current_x = 0
-        self.window = window_height
+        self.window_height = WINDOW_SIZE[1]
         #load idle anim frames/action 0
         animation_types = ['idle', 'run', 'jump']
         for animation in animation_types:
@@ -27,12 +29,11 @@ class Player(pygame.sprite.Sprite):
             self.animation_list.append(temp_list)
 
         self.image = self.animation_list[self.action][self.index]
-        # self.rect = self.image.get_rect(topleft = pos)
-        self.rect = pygame.rect.Rect(0, 0, 15, 15)
-        self.collision_types =  {'top': False, 'bottom': False, 'right': False, 'left': False} # PEP8: spaces
-        
-        
-        self.jump_count = 0
+        self.rect = self.image.get_rect(topleft = pos)
+        self.width =self.image.get_width()
+        self.height = self.image.get_height()
+       
+       #Player movement attributes
         self.jump_intensity = -6
         self.direction = pygame.math.Vector2(0,0)
         self.speed = 2
@@ -41,59 +42,64 @@ class Player(pygame.sprite.Sprite):
         self.gravity = 0.3
         self.air_timer = 0
 
-        #player status
-        self.on_left = False
-        self.on_right = False
-        
-
         #debug atributes
-        self.t_rect = True
+        self.t_rect = False
     
-    def movement_collision(self,tile_rects):
-        #Horizontal movement
-        self.rect.x += self.direction.x*self.speed
+    def movementANDcollisions(self,tile_rects):
+        #Reset movement variables
+        dx = 0
+        dy = 0
+        #gets inputs and the values that represent how much the player is gonna move
+        if self.moving_left:
+            self.direction.x = -1
+            dx = self.direction.x *self.speed
+            self.flip = True
+        if self.moving_right :
+            self.direction.x = 1
+            dx = self.direction.x * self.speed
+            self.flip = False
+
+        #Apply gravity
+        self.direction.y += self.gravity
+        if self.direction.y > 5:
+            self.direction.y = 5
+        dy += self.direction.y    
         
-        for sprite in tile_rects.sprites():
-            if self.rect.colliderect(sprite.rect):
-                if self.direction.x > 0:
-                    self.rect.right = sprite.rect.left
-                    self.collision_types['right'] = True
-                    self.current_x = self.rect.right
-                elif self.direction.x < 0:
-                    self.rect.left = sprite.rect.right
-                    self.collision_types['left'] = True
-                    self.current_x = self.rect.left
 
-        if self.collision_types['right'] and (self.rect.right > self.current_x or self.direction.x <= 0):
-            self.collision_types['right'] = False
-        if self.collision_types['left'] and (self.rect.left < self.current_x or self.direction.x >= 0):
-            self.collision_types['left'] = False
-
-        #Vertical movement
-        self.apply_gravity()
-
-        for sprite in tile_rects.sprites():
-            if self.rect.colliderect(sprite.rect):
-                if self.direction.y > 0:
-                    self.rect.bottom = sprite.rect.top
+        #Check for collisions
+        for tile in tile_rects:
+            #Check collision in the x direction
+            if tile[1].colliderect(self.rect.x + dx, self.rect.y,self.width, self.height):
+                dx = 0
+            #Check collision in the y direction
+            if tile[1].colliderect(self.rect.x, self.rect.y + dy,self.width, self.height):
+                #check if below ground i.e. jumping(ceiling collision)
+                if self.direction.y < 0:
                     self.direction.y = 0
-                    self.collision_types['bottom'] = True
-                    
-                elif self.direction.y < 0:
-                    self.rect.top = sprite.rect.bottom
-                    self.direction.y = 0
-                    self.collision_types['top'] = True
-        
-        if self.collision_types['bottom'] and self.direction.y < 0 or self.direction.y > 1 :
-            self.collision_types['bottom'] = False
-        
-        if self.collision_types['top'] and self.direction.y > 0:
-            self.collision_types['top'] = False
+                    dy = tile[1].bottom - self.rect.top
 
-        if self.collision_types['bottom']:
-            self.air_timer = 0
+                #check if above the ground i.e falling (ground collision)
+                elif self.direction.y >= 0:
+                   self.direction.y = 0
+                   dy = tile[1].top - self.rect.bottom
+                   self.air_timer = 0 
+        #update player postion
+        self.rect.x += dx
+        self.rect.y += dy 
+
+        if self.rect.centerx > 210 and self.direction.x > 0:
+            self.rect.x -= dx 
+            screen_scroll = -dx
+        elif self.rect.centerx < 50 and self.direction.x < 0:
+            self.rect.x -= dx
+            screen_scroll = -dx
         else:
-            self.air_timer += 1
+            screen_scroll = 0 
+        return screen_scroll     
+        #if self.collision_types['bottom']:
+           #self.air_timer = 0
+        #else:
+            #self.air_timer += 1
 
     def get_input(self):
         
@@ -113,15 +119,14 @@ class Player(pygame.sprite.Sprite):
     def apply_gravity(self):  
         self.direction.y += self.gravity
         self.rect.y += self.direction.y
+        #self.y += self.direction.y
         if self.direction.y > 5:
             self.direction.y = 5
 
     def jump(self):
             self.direction.y = self.jump_intensity
              
-    def update(self,tile_rects):
-        self.get_input()
-        self.movement_collision(tile_rects)
+    def update(self):
         self.update_anim()
         self.check_dead() 
         
@@ -141,30 +146,12 @@ class Player(pygame.sprite.Sprite):
         #changes actions
         if not self.dead:
             if self.direction.y < 0:
-                self.update_action(2)
+                self.update_action(2)#2:Jump
 
             elif self.moving_right or self.moving_left:
                     self.update_action(1)#1:run
             else:
                     self.update_action(0)#0:idle
-
-        # #set rect
-        # #for bottom collision
-        # if self.collision_types['bottom'] and self.collision_types['right']:
-        #     self.rect = self.image.get_rect(bottomright = self.rect.bottomright)
-        # elif self.collision_types['bottom'] and self.collision_types['left']:
-        #     self.rect = self.image.get_rect(bottomleft = self.rect.bottomleft)
-        # elif self.collision_types['bottom']:
-        #     self.rect = self.image.get_rect(midbottom = self.rect.midbottom)
-        # #for top collisions
-        # elif self.collision_types['top'] and self.collision_types['right']:
-        #     self.rect = self.image.get_rect(topright = self.rect.topright)
-        # elif self.collision_types['top'] and self.collision_types['left']:
-        #     self.rect = self.image.get_rect(topleft = self.rect.topleft)
-        # #elif self.collision_types['top']:
-        # #    self.rect = self.image.get_rect(midtop = self.rect.midtop)
-        # elif not self.collision_types['top'] and  not self.collision_types['bottom'] :
-        #     self.rect = self.image.get_rect(center = self.rect.center)
 
 
     def update_action(self, new_action):
@@ -177,12 +164,12 @@ class Player(pygame.sprite.Sprite):
             self.update_time = pygame.time.get_ticks()
     
     def check_dead(self):
-        if self.rect.y > self.window:
+        if self.rect.y > self.window_height:
             self.dead = True
         else:
             self.dead = False 
 
     def draw(self,display):
-        display.blit(pygame.transform.flip(self.image,self.flip,False),(self.rect.x,self.rect.y))
+        display.blit(pygame.transform.flip(self.image,self.flip,False), self.rect)
         if self.t_rect:
             pygame.draw.rect(display, (255,0,0), self.rect,  1)

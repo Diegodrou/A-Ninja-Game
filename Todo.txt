@@ -1,6 +1,3 @@
-to do:
-X-fix bug teleporting to top of tile (bug related with animation,improve debug function to fix it , watch clear code video)
-X-create a level editor
-1-make attack move
--frame independence
-x-menu for chosing a level
+To do:
+fix hitbox(changing asset)
+
