@@ -4,7 +4,6 @@ from levelloader import World
 from settings import*
 from player import Player
 from buttons import *
-from Tile import*
 
 #Initialize Pygame and create window
 pygame.init()
