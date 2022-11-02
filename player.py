@@ -32,7 +32,9 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft = pos)
         self.width =self.image.get_width()
         self.height = self.image.get_height()
-       
+
+        
+
        #Player movement attributes
         self.jump_intensity = -6
         self.direction = pygame.math.Vector2(0,0)
@@ -86,6 +88,7 @@ class Player(pygame.sprite.Sprite):
         #update player postion
         self.rect.x += dx
         self.rect.y += dy 
+        
 
         if self.rect.centerx > 210 and self.direction.x > 0:
             self.rect.x -= dx 
@@ -100,28 +103,6 @@ class Player(pygame.sprite.Sprite):
            #self.air_timer = 0
         #else:
             #self.air_timer += 1
-
-    def get_input(self):
-        
-        if self.moving_right == True:
-            self.flip = False
-            self.direction.x = 1
-            
-            
-        elif self.moving_left == True:
-            self.flip = True
-            self.direction.x  = -1
-            
-        else:
-            self.direction.x = 0
-    
-                
-    def apply_gravity(self):  
-        self.direction.y += self.gravity
-        self.rect.y += self.direction.y
-        #self.y += self.direction.y
-        if self.direction.y > 5:
-            self.direction.y = 5
 
     def jump(self):
             self.direction.y = self.jump_intensity
@@ -153,7 +134,6 @@ class Player(pygame.sprite.Sprite):
             else:
                     self.update_action(0)#0:idle
 
-
     def update_action(self, new_action):
         
         #check if new action is different to the previous
@@ -162,6 +142,7 @@ class Player(pygame.sprite.Sprite):
             #update the anim settings
             self.index = 0
             self.update_time = pygame.time.get_ticks()
+            
     
     def check_dead(self):
         if self.rect.y > self.window_height:
