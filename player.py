@@ -151,6 +151,13 @@ class Player(pygame.sprite.Sprite):
             self.dead = False 
 
     def draw(self,display):
-        display.blit(pygame.transform.flip(self.image,self.flip,False), self.rect)
+        if self.flip and self.action == 1:
+            display.blit(pygame.transform.flip(self.image,self.flip,False), (self.rect.x - 7 , self.rect.y))
+        
+        elif self.flip and self.action == 2:
+            display.blit(pygame.transform.flip(self.image,self.flip,False), (self.rect.x - 7 , self.rect.y))
+        
+        else:
+            display.blit(pygame.transform.flip(self.image,self.flip,False), (self.rect.x , self.rect.y))
         if self.t_rect:
             pygame.draw.rect(display, (255,0,0), self.rect,  1)
