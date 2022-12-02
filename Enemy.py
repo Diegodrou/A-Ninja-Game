@@ -4,61 +4,53 @@ import os
 from settings import WINDOW_SIZE
 
 
-class Player(pygame.sprite.Sprite):
+class Enemy(pygame.sprite.Sprite):
     def __init__(self, pos):
         super().__init__()
         self.dead = False
         self.flip = False
-        self.window_height = WINDOW_SIZE[1]
-        #animation related stuff
+        self.speed = 1
+        self.direction = pygame.math.Vector2(0,0)
+        self.direction.x = -1
+        self.moving_right = False
+        self.moving_left = False
+        self.move_counter = 0
+        self.gravity = 0.3
+
+        #Animation related stuff
         self.animation_list = []
         self.index = 0
         self.action = 0
         self.update_time = pygame.time.get_ticks()
         #load idle anim frames/action 0
-        animation_types = ['idle', 'run', 'jump']
+        animation_types = ['run']
         for animation in animation_types:
         # reset temporary list of images
             temp_list = []
             # count number of files in the folder
-            num_of_frames = len(os.listdir(f'assets/img/{animation}'))
+            num_of_frames = len(os.listdir(f'assets/enemyAssets/{animation}'))
             for i in range(num_of_frames):
-                p_img = pygame.image.load(os.path.join("assets","img",animation, f'{i}.png'))
+                p_img = pygame.image.load(os.path.join("assets","enemyAssets",animation, f'{i}.png'))
                 temp_list.append(p_img)
             self.animation_list.append(temp_list)
-
+        
         self.image = self.animation_list[self.action][self.index]
         self.rect = self.image.get_rect(topleft = pos)
-        self.width =self.image.get_width()
+        self.width = self.image.get_width()
         self.height = self.image.get_height()
 
-        
 
-       #Player movement attributes
-        self.jump_intensity = -6
-        self.direction = pygame.math.Vector2(0,0)
-        self.speed = 2
-        self.moving_right = False
-        self.moving_left = False
-        self.gravity = 0.3
-        self.air_timer = 0
-
-        #debug atributes
-        self.t_rect = False
-    
-    def movementANDcollisions(self,tile_rects):
+    def movementANDcollisions(self,tile_rects): #moves the player and cheks for  collisions
         #Reset movement variables
         dx = 0
         dy = 0
         #gets inputs and the values that represent how much the player is gonna move
         if self.moving_left:
-            self.direction.x = -1
             dx = self.direction.x *self.speed
-            self.flip = True
-        if self.moving_right :
-            self.direction.x = 1
-            dx = self.direction.x * self.speed
             self.flip = False
+        if self.moving_right :
+            dx = self.direction.x * self.speed
+            self.flip = True
 
         #Apply gravity
         self.direction.y += self.gravity
@@ -87,29 +79,25 @@ class Player(pygame.sprite.Sprite):
         #update player postion
         self.rect.x += dx
         self.rect.y += dy 
-        
 
-        if self.rect.centerx > 210 and self.direction.x > 0:
-            self.rect.x -= dx 
-            screen_scroll = -dx
-        elif self.rect.centerx < 50 and self.direction.x < 0:
-            self.rect.x -= dx
-            screen_scroll = -dx
-        else:
-            screen_scroll = 0 
-        return screen_scroll     
-        #if self.collision_types['bottom']:
-           #self.air_timer = 0
-        #else:
-            #self.air_timer += 1
+    def AI(self,player_status,tile_rects,screen_scroll):
+        if (not self.dead) and not player_status:
+            if self.direction.x == -1:
+                self.moving_left = True
+            else:
+                self.moving_left = False
+            self.moving_right = not self.moving_left
+            self.movementANDcollisions(tile_rects)
+            self.move_counter += 1
+            
 
-    def jump(self):
-            self.direction.y = self.jump_intensity
-             
-    def update(self):
-        self.update_anim()
-        self.check_dead() 
-        
+            if self.move_counter > 16:
+                self.direction.x *= -1
+                self.move_counter *= -1
+
+        #scroll
+        self.rect.x += screen_scroll
+
     def update_anim(self):
 
         #update animation
@@ -125,13 +113,11 @@ class Player(pygame.sprite.Sprite):
                 self.index = 0
         #changes actions
         if not self.dead:
-            if self.direction.y < 0:
-                self.update_action(2)#2:Jump
 
-            elif self.moving_right or self.moving_left:
-                    self.update_action(1)#1:run
-            else:
-                    self.update_action(0)#0:idle
+            if self.moving_right or self.moving_left:
+                    self.update_action(0)#0:run
+ #           else:
+ #                   self.update_action(0)#1:shooting
 
     def update_action(self, new_action):
         
@@ -141,22 +127,12 @@ class Player(pygame.sprite.Sprite):
             #update the anim settings
             self.index = 0
             self.update_time = pygame.time.get_ticks()
-            
-    
+
     def check_dead(self):
-        if self.rect.y > self.window_height:
-            self.dead = True
-        else:
-            self.dead = False 
+        pass
+
+    def update(self):
+        self.update_anim()
 
     def draw(self,display):
-        if self.flip and self.action == 1:
-            display.blit(pygame.transform.flip(self.image,self.flip,False), (self.rect.x - 7 , self.rect.y))
-        
-        elif self.flip and self.action == 2:
-            display.blit(pygame.transform.flip(self.image,self.flip,False), (self.rect.x - 7 , self.rect.y))
-        
-        else:
-            display.blit(pygame.transform.flip(self.image,self.flip,False), (self.rect.x , self.rect.y))
-        if self.t_rect:
-            pygame.draw.rect(display, (255,0,0), self.rect,  1)
+        display.blit(pygame.transform.flip(self.image,self.flip,False), (self.rect.x , self.rect.y))

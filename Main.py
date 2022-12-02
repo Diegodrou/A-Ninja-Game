@@ -4,6 +4,7 @@ from levelloader import World
 from settings import*
 from player import Player
 from buttons import *
+from Enemy import Enemy
 
 #Initialize Pygame and create window
 pygame.init()
@@ -108,11 +109,13 @@ def Game(lvl):
     #game instances
     world=World(lvl)
     player=Player(world.spawnpoint(lvl))
+    enemy = Enemy(world.enemy_spawn(lvl))
     player_speed = player.speed
 
     #Sprite group creation
     all_sprites = pygame.sprite.Group()
     all_sprites.add(player)
+    all_sprites.add(enemy)
 
     #Game functions
     def debug_stats():#Shows stats useful for debugging
@@ -179,6 +182,9 @@ def Game(lvl):
         tile_rects = world.run()
         screen_scroll = player.movementANDcollisions(tile_rects)
         player.update()
+        enemy.AI(player.dead,tile_rects,screen_scroll)
+        enemy.update()
+        
         # - all draws -
 
         display.blit(pygame.transform.scale(city_background,DISPLAY_SIZE),(0,0))
@@ -192,7 +198,6 @@ def Game(lvl):
         
         if fps_toggle:
             debug_stats()
-
 
         #check if game is paused
         if game_pause :
@@ -213,7 +218,6 @@ def Game(lvl):
     
     pygame.quit()
     exit()
-
 
 main_menu()
 pygame.quit()

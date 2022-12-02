@@ -1,4 +1,4 @@
 To do:
--fix hitbox(changing asset)
-
+-create attack/defense mechanic
+-create enemy
 

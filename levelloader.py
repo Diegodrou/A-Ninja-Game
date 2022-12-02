@@ -13,7 +13,7 @@ class World():
         
         for row_index,row in enumerate(lvl_layout):
             for col_index,cell in enumerate(row):
-                if cell >= 0 and cell != 1:
+                if cell >= 0 and cell != 1 and cell != 2:
                     img = tiles_imgs[cell]
                     img_rect = img.get_rect()
                     img_rect.x = col_index * TILE_SIZE
@@ -30,6 +30,14 @@ class World():
         for row_index,row in enumerate(lvl_layout):
             for col_index,cell in enumerate(row):
                 if cell == 1:
+                    x = col_index * TILE_SIZE
+                    y = row_index * TILE_SIZE
+                    spawn = (x,y)
+                    return spawn
+    def enemy_spawn(self,lvl_layout):
+        for row_index,row in enumerate(lvl_layout):
+            for col_index,cell in enumerate(row):
+                if cell == 2:
                     x = col_index * TILE_SIZE
                     y = row_index * TILE_SIZE
                     spawn = (x,y)
