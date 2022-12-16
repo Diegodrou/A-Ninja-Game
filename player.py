@@ -10,13 +10,16 @@ class Player(pygame.sprite.Sprite):
         self.dead = False
         self.flip = False
         self.window_height = WINDOW_SIZE[1]
+        self.ATTACK_RECT_W = 14
+        self.hit_counter = 0 #get the number of times that the attack collider collided with the enemy collider during the attack animation
         #animation related stuff
         self.animation_list = []
         self.index = 0
         self.action = 0
+        self.attack = False
         self.update_time = pygame.time.get_ticks()
         #load idle anim frames/action 0
-        animation_types = ['idle', 'run', 'jump']
+        animation_types = ['idle', 'run', 'jump','attack']
         for animation in animation_types:
         # reset temporary list of images
             temp_list = []
@@ -31,7 +34,7 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(topleft = pos)
         self.width =self.image.get_width()
         self.height = self.image.get_height()
-
+        
         
 
        #Player movement attributes
@@ -46,7 +49,22 @@ class Player(pygame.sprite.Sprite):
         #debug atributes
         self.t_rect = False
     
-    def movementANDcollisions(self,tile_rects):
+    def attacks(self,target):
+        if self.flip:
+            attack_rect = pygame.Rect(self.rect.centerx,self.rect.y, -self.ATTACK_RECT_W,self.rect.height)
+        else:
+            attack_rect = pygame.Rect(self.rect.centerx,self.rect.y, self.ATTACK_RECT_W,self.rect.height)
+        if attack_rect.colliderect(target):
+            if self.hit_counter > 0:
+                pass
+            else:
+                self.hit_counter += 1
+                print("hit")
+
+    
+
+
+    def movementANDcollisions(self,tile_rects,enemy_rect):
         #Reset movement variables
         dx = 0
         dy = 0
@@ -59,7 +77,10 @@ class Player(pygame.sprite.Sprite):
             self.direction.x = 1
             dx = self.direction.x * self.speed
             self.flip = False
-
+         #attack inputs
+        if self.attack:
+            self.attacks(enemy_rect)
+            #self.attack = False
         #Apply gravity
         self.direction.y += self.gravity
         if self.direction.y > 5:
@@ -87,7 +108,7 @@ class Player(pygame.sprite.Sprite):
         #update player postion
         self.rect.x += dx
         self.rect.y += dy 
-        
+
 
         if self.rect.centerx > 210 and self.direction.x > 0:
             self.rect.x -= dx 
@@ -122,6 +143,9 @@ class Player(pygame.sprite.Sprite):
             self.index += 1
             #if the animation has run out , reset back to the start
             if self.index >= len(self.animation_list[self.action]):
+                if self.action == 3:
+                    self.attack = False
+                    self.hit_counter = 0
                 self.index = 0
         #changes actions
         if not self.dead:
@@ -130,6 +154,8 @@ class Player(pygame.sprite.Sprite):
 
             elif self.moving_right or self.moving_left:
                     self.update_action(1)#1:run
+            elif self.attack:
+                self.update_action(3)#3:attack
             else:
                     self.update_action(0)#0:idle
 
@@ -149,14 +175,22 @@ class Player(pygame.sprite.Sprite):
         else:
             self.dead = False 
 
+        
     def draw(self,display):
         if self.flip and self.action == 1:
             display.blit(pygame.transform.flip(self.image,self.flip,False), (self.rect.x - 7 , self.rect.y))
         
         elif self.flip and self.action == 2:
             display.blit(pygame.transform.flip(self.image,self.flip,False), (self.rect.x - 7 , self.rect.y))
+
+        elif self.flip and self.action == 3:
+            display.blit(pygame.transform.flip(self.image,self.flip,False), (self.rect.x - 7 , self.rect.y))
         
         else:
             display.blit(pygame.transform.flip(self.image,self.flip,False), (self.rect.x , self.rect.y))
         if self.t_rect:
             pygame.draw.rect(display, (255,0,0), self.rect,  1)
+            if self.flip:
+                pygame.draw.rect(display, (0,255,0), pygame.Rect(self.rect.centerx,self.rect.y, -self.ATTACK_RECT_W,self.rect.height) ,  1)
+            else :
+                pygame.draw.rect(display, (0,255,0), pygame.Rect(self.rect.centerx,self.rect.y, self.ATTACK_RECT_W,self.rect.height) ,  1)

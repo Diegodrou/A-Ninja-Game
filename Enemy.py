@@ -90,7 +90,6 @@ class Enemy(pygame.sprite.Sprite):
             self.movementANDcollisions(tile_rects)
             self.move_counter += 1
             
-
             if self.move_counter > 16:
                 self.direction.x *= -1
                 self.move_counter *= -1

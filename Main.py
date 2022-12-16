@@ -115,7 +115,8 @@ def Game(lvl):
     #Sprite group creation
     all_sprites = pygame.sprite.Group()
     all_sprites.add(player)
-    all_sprites.add(enemy)
+    enemy_sprites = pygame.sprite.Group()
+    enemy_sprites.add(enemy)
 
     #Game functions
     def debug_stats():#Shows stats useful for debugging
@@ -158,11 +159,15 @@ def Game(lvl):
                 if event.key == pygame.K_BACKSLASH:
                     fps_toggle = not fps_toggle
                     player.t_rect = not player.t_rect
+                
                 if event.key == pygame.K_ESCAPE:
                     if game_pause:
                         game_pause = False
                     else:
                         game_pause = True
+
+                if event.key == pygame.K_f:
+                    player.attack = True
 
                 if event.key == pygame.K_RIGHT:
                     player.moving_right = True
@@ -177,10 +182,10 @@ def Game(lvl):
                     player.moving_right = False
                 if event.key == pygame.K_LEFT:
                     player.moving_left = False
-            
+
         #all_sprite updates
         tile_rects = world.run()
-        screen_scroll = player.movementANDcollisions(tile_rects)
+        screen_scroll = player.movementANDcollisions(tile_rects, enemy.rect)
         player.update()
         enemy.AI(player.dead,tile_rects,screen_scroll)
         enemy.update()
@@ -190,9 +195,11 @@ def Game(lvl):
         display.blit(pygame.transform.scale(city_background,DISPLAY_SIZE),(0,0))
         world.draw(display,screen_scroll)
 
-        for item in all_sprites:
+        #for item in all_sprites:
+        #     item.draw(display)
+        player.draw(display)
+        for item in enemy_sprites:
             item.draw(display)
-
 
         window.blit(pygame.transform.scale(display, WINDOW_SIZE), (0,0))
         
