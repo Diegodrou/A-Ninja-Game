@@ -13,7 +13,7 @@ class Player(pygame.sprite.Sprite):
         self.ATTACK_RECT_W = 14
         self.ATTACK_RECT_W_WHEN_FLIPPED = -11 # when the frame is flipped the attack rect appears bigger if I only change the sign of the ATTACK_RECT_W .
                                               #In consequence I have to make it bit shorter when flipped.
-                                              
+
         self.hit_counter = 0 #get the number of times that the attack collider collided with the enemy collider during the attack animation
         #animation related stuff
         self.animation_list = []
@@ -58,11 +58,12 @@ class Player(pygame.sprite.Sprite):
         else:
             attack_rect = pygame.Rect(self.rect.centerx,self.rect.y, self.ATTACK_RECT_W,self.rect.height)
         if attack_rect.colliderect(target):
-            if self.hit_counter > 0:
-                pass
-            else:
-                self.hit_counter += 1
-                print("hit")
+            if self.action == 3:#so that it doenst happen while other animations are running
+                if self.hit_counter > 0:
+                    pass
+                else:
+                    self.hit_counter += 1
+                    print("hit")
 
     
 
@@ -140,6 +141,8 @@ class Player(pygame.sprite.Sprite):
         ANIMATION_COOLDOWN = 150
         #update img depending on current frame
         self.image = self.animation_list[self.action][self.index]
+        #if self.action == 1:
+            #self.attack = False
         #check if enough time has passed since the last update
         if pygame.time.get_ticks() - self.update_time > ANIMATION_COOLDOWN:
             self.update_time = pygame.time.get_ticks()
@@ -149,6 +152,8 @@ class Player(pygame.sprite.Sprite):
                 if self.action == 3:
                     self.attack = False
                     self.hit_counter = 0
+                #if self.action == 1:
+                    #self.attack = False
                 self.index = 0
         #changes actions
         if not self.dead:
