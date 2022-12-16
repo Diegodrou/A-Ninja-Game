@@ -11,6 +11,9 @@ class Player(pygame.sprite.Sprite):
         self.flip = False
         self.window_height = WINDOW_SIZE[1]
         self.ATTACK_RECT_W = 14
+        self.ATTACK_RECT_W_WHEN_FLIPPED = -11 # when the frame is flipped the attack rect appears bigger if I only change the sign of the ATTACK_RECT_W .
+                                              #In consequence I have to make it bit shorter when flipped.
+                                              
         self.hit_counter = 0 #get the number of times that the attack collider collided with the enemy collider during the attack animation
         #animation related stuff
         self.animation_list = []
@@ -51,7 +54,7 @@ class Player(pygame.sprite.Sprite):
     
     def attacks(self,target):
         if self.flip:
-            attack_rect = pygame.Rect(self.rect.centerx,self.rect.y, -self.ATTACK_RECT_W,self.rect.height)
+            attack_rect = pygame.Rect(self.rect.centerx,self.rect.y, self.ATTACK_RECT_W_WHEN_FLIPPED ,self.rect.height)
         else:
             attack_rect = pygame.Rect(self.rect.centerx,self.rect.y, self.ATTACK_RECT_W,self.rect.height)
         if attack_rect.colliderect(target):
@@ -191,6 +194,6 @@ class Player(pygame.sprite.Sprite):
         if self.t_rect:
             pygame.draw.rect(display, (255,0,0), self.rect,  1)
             if self.flip:
-                pygame.draw.rect(display, (0,255,0), pygame.Rect(self.rect.centerx,self.rect.y, -self.ATTACK_RECT_W,self.rect.height) ,  1)
+                pygame.draw.rect(display, (0,255,0), pygame.Rect(self.rect.centerx,self.rect.y, self.ATTACK_RECT_W_WHEN_FLIPPED ,self.rect.height) ,  1)
             else :
                 pygame.draw.rect(display, (0,255,0), pygame.Rect(self.rect.centerx,self.rect.y, self.ATTACK_RECT_W,self.rect.height) ,  1)

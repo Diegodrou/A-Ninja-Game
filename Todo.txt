@@ -8,6 +8,5 @@ To do:
 Known bugs:
 -attack will happen after you finish running if you press attack button while youre running
 -glitch drawing flipped frames
--attack collider bigger when flipped
 
 
