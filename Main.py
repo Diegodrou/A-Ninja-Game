@@ -8,7 +8,7 @@ from Enemy import Enemy
 
 #Initialize Pygame and create window
 pygame.init()
-pygame.display.set_caption('platformer')
+pygame.display.set_caption('A ninja game')
 
 #Creation of instances
 window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -117,6 +117,7 @@ def Game(lvl):
     all_sprites.add(player)
     enemy_sprites = pygame.sprite.Group()
     enemy_sprites.add(enemy)
+    bullet_group = pygame.sprite.Group()
 
     #Game functions
     def debug_stats():#Shows stats useful for debugging
@@ -145,6 +146,10 @@ def Game(lvl):
         window.blit(player_x_direction_text,(10,40))
         window.blit(player_y_direction_text,(10,60))
         window.blit(player_center_x_text,(10,80))
+
+    def update_bullet_pos(enemy_dir):
+        for item in bullet_group:
+            item.update(enemy_dir)
 
     #Game Loop
     while game_run:
@@ -187,8 +192,12 @@ def Game(lvl):
         tile_rects = world.run()
         screen_scroll = player.movementANDcollisions(tile_rects, enemy.rect)
         player.update()
-        enemy.AI(player.dead,tile_rects,screen_scroll)
-        enemy.update()
+        enemy.AI(player.rect,player.dead,tile_rects,screen_scroll)
+        if enemy.Shoot:
+            Bullet = enemy.shoot()
+            bullet_group.add(Bullet)
+        update_bullet_pos(-1)
+        enemy.update(player)
         
         # - all draws -
 
@@ -198,6 +207,10 @@ def Game(lvl):
         #for item in all_sprites:
         #     item.draw(display)
         player.draw(display)
+
+        for bullet in bullet_group:
+            Bullet.draw(display)
+
         for item in enemy_sprites:
             item.draw(display)
 

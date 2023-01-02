@@ -20,6 +20,7 @@ class Player(pygame.sprite.Sprite):
         self.index = 0
         self.action = 0
         self.attack = False
+        self.hit_enemy = False
         self.update_time = pygame.time.get_ticks()
         #load idle anim frames/action 0
         animation_types = ['idle', 'run', 'jump','attack']
@@ -53,6 +54,7 @@ class Player(pygame.sprite.Sprite):
         self.t_rect = False
     
     def attacks(self,target):
+        self.hit = False
         if self.flip:
             attack_rect = pygame.Rect(self.rect.centerx,self.rect.y, self.ATTACK_RECT_W_WHEN_FLIPPED ,self.rect.height)
         else:
@@ -64,7 +66,7 @@ class Player(pygame.sprite.Sprite):
                 else:
                     self.hit_counter += 1
                     print("hit")
-
+                    self.hit_enemy = True
     
 
 

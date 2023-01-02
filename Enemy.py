@@ -1,8 +1,11 @@
 import pygame
 import os
+from Bullet import Bullet
 
 from settings import WINDOW_SIZE
 
+left_threshold = 40
+right_threshold = 50
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, pos):
@@ -16,6 +19,9 @@ class Enemy(pygame.sprite.Sprite):
         self.moving_left = False
         self.move_counter = 0
         self.gravity = 0.3
+        self.idle_state = True
+        self.attack_state = False
+        self.Shoot = False
 
         #Animation related stuff
         self.animation_list = []
@@ -80,22 +86,42 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.x += dx
         self.rect.y += dy 
 
-    def AI(self,player_status,tile_rects,screen_scroll):
+    def AI(self,player_rect,player_status,tile_rects,screen_scroll):
         if (not self.dead) and not player_status:
-            if self.direction.x == -1:
-                self.moving_left = True
-            else:
-                self.moving_left = False
-            self.moving_right = not self.moving_left
-            self.movementANDcollisions(tile_rects)
-            self.move_counter += 1
-            
-            if self.move_counter > 16:
-                self.direction.x *= -1
-                self.move_counter *= -1
+            self.decide_enemy_state(player_rect)
+            if self.idle_state:
+                if self.direction.x == -1:
+                    self.moving_left = True
+                else:
+                    self.moving_left = False
+                self.moving_right = not self.moving_left
+                self.movementANDcollisions(tile_rects)
+                self.move_counter += 1
+                
+                if self.move_counter > 16:
+                    self.direction.x *= -1
+                    self.move_counter *= -1
+            if self.attack_state:
+                x_diff = self.rect.x - player_rect.x
+                if x_diff > 0: #check if player is at the left of the enemy
+                    self.moving_left = True
+                    self.moving_right = False
+                if x_diff < 0:#check if player is at the right of the enemy
+                    self.moving_right = True
+                    self.moving_left = False
+                
+                
+                if self.moving_left:
+                    self.flip = False
+                
+                if self.moving_right:
+                    self.flip = True
 
+                self.Shoot = True
+                
         #scroll
         self.rect.x += screen_scroll
+
 
     def update_anim(self):
 
@@ -127,11 +153,33 @@ class Enemy(pygame.sprite.Sprite):
             self.index = 0
             self.update_time = pygame.time.get_ticks()
 
-    def check_dead(self):
-        pass
+    def check_dead(self,player_rect,player_attacking):
+        if self.rect.colliderect(player_rect) and player_attacking:
+            self.kill()
 
-    def update(self):
+    def decide_enemy_state(self,player_rect):
+        if (player_rect.x <= (self.rect.x + right_threshold)) and (player_rect.x >= self.rect.x - left_threshold):
+            self.idle_state =False
+            self.attack_state = True
+        else:
+            self.attack_state = False
+            self.idle_state = True
+    
+    def shoot(self):
+        if self.moving_left:
+            self.Shoot = False
+            return Bullet(self.rect.midleft[0],self.rect.midleft[1])
+        if self.moving_right:
+            self.Shoot = False
+            return Bullet(self.rect.midright[0],self.rect.midright[1])
+
+        
+
+    def update(self,player):
+        self.check_dead(player.rect,player.hit_enemy)
         self.update_anim()
 
     def draw(self,display):
         display.blit(pygame.transform.flip(self.image,self.flip,False), (self.rect.x , self.rect.y))
+        display.blit(pygame.Surface((5,5)),(self.rect.x + right_threshold, self.rect.y))
+        display.blit(pygame.Surface((5,5)),(self.rect.x - left_threshold, self.rect.y))
