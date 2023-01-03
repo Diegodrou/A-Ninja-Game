@@ -105,9 +105,11 @@ class Enemy(pygame.sprite.Sprite):
                 x_diff = self.rect.x - player_rect.x
                 if x_diff > 0: #check if player is at the left of the enemy
                     self.moving_left = True
+                    self.direction.x = -1
                     self.moving_right = False
                 if x_diff < 0:#check if player is at the right of the enemy
                     self.moving_right = True
+                    self.direction.x = 1
                     self.moving_left = False
                 
                 
@@ -168,10 +170,10 @@ class Enemy(pygame.sprite.Sprite):
     def shoot(self):
         if self.moving_left:
             self.Shoot = False
-            return Bullet(self.rect.midleft[0],self.rect.midleft[1])
+            return Bullet(self.rect.midleft[0],self.rect.midleft[1],self.direction.x)
         if self.moving_right:
             self.Shoot = False
-            return Bullet(self.rect.midright[0],self.rect.midright[1])
+            return Bullet(self.rect.midright[0],self.rect.midright[1],self.direction.x)
 
         
 
