@@ -36,6 +36,8 @@ class Player(pygame.sprite.Sprite):
 
         self.image = self.animation_list[self.action][self.index]
         self.rect = self.image.get_rect(topleft = pos)
+        print(self.rect.top)
+        self.rect = self.rect.inflate(0,0)
         self.width =self.image.get_width()
         self.height = self.image.get_height()
         
@@ -184,9 +186,15 @@ class Player(pygame.sprite.Sprite):
             self.dead = True
         else:
             self.dead = False 
+    
+    def find_player_surface_blit_coordinates(self):
+        current_image_rect = self.image.get_rect()
+        xy_center_top_cordinates = (current_image_rect.centerx, current_image_rect.top)
+        
 
         
     def draw(self,display):
+        player_render_coordinates = self.find_player_surface_blit_coordinates()
         if self.flip and self.action == 1:
             display.blit(pygame.transform.flip(self.image,self.flip,False), (self.rect.x - 7 , self.rect.y))
         

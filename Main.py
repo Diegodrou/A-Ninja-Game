@@ -147,9 +147,9 @@ def Game(lvl):
         window.blit(player_y_direction_text,(10,60))
         window.blit(player_center_x_text,(10,80))
 
-    def update_bullet_pos():
+    def update_bullet_pos(tiles,player_rect):
         for item in bullet_group:
-            item.update()
+            item.update(tiles,player_rect)
 
     #Game Loop
     while game_run:
@@ -196,7 +196,7 @@ def Game(lvl):
         if enemy.Shoot:
             Bullet = enemy.shoot()
             bullet_group.add(Bullet)
-        update_bullet_pos()
+        update_bullet_pos(tile_rects,player.rect)
         enemy.update(player)
         
         # - all draws -
