@@ -35,9 +35,9 @@ class Player(pygame.sprite.Sprite):
             self.animation_list.append(temp_list)
 
         self.image = self.animation_list[self.action][self.index]
-        self.rect = self.image.get_rect(topleft = pos)
-        print(self.rect.top)
-        self.rect = self.rect.inflate(0,0)
+        #self.rect = self.image.get_rect(topleft = pos)
+        #self.rect = self.rect.inflate(-11,0)
+        self.rect = pygame.Rect(pos,(6,16))
         self.width =self.image.get_width()
         self.height = self.image.get_height()
         
@@ -95,7 +95,8 @@ class Player(pygame.sprite.Sprite):
             self.direction.y = 5
         dy += self.direction.y    
         
-
+        self.width = self.rect.width
+        self.height = self.rect.height
         #Check for collisions
         for tile in tile_rects:
             #Check collision in the x direction
@@ -188,24 +189,26 @@ class Player(pygame.sprite.Sprite):
             self.dead = False 
     
     def find_player_surface_blit_coordinates(self):
-        current_image_rect = self.image.get_rect()
-        xy_center_top_cordinates = (current_image_rect.centerx, current_image_rect.top)
-        
-
-        
+        image_width = self.image.get_width()
+        middle_of_player_rect = self.rect.width/2
+        middle_of_the_the_surface = image_width/2
+        distance_between_middles = middle_of_the_the_surface - middle_of_player_rect
+        topleft_coordinates = (self.rect.x - distance_between_middles, self.rect.y)
+        return topleft_coordinates
+          
     def draw(self,display):
         player_render_coordinates = self.find_player_surface_blit_coordinates()
-        if self.flip and self.action == 1:
-            display.blit(pygame.transform.flip(self.image,self.flip,False), (self.rect.x - 7 , self.rect.y))
+        #if self.flip and self.action == 1:
+            #display.blit(pygame.transform.flip(self.image,self.flip,False), (self.rect.x - 7 , self.rect.y))
         
-        elif self.flip and self.action == 2:
-            display.blit(pygame.transform.flip(self.image,self.flip,False), (self.rect.x - 7 , self.rect.y))
+        #elif self.flip and self.action == 2:
+            #display.blit(pygame.transform.flip(self.image,self.flip,False), (self.rect.x - 7 , self.rect.y))
 
-        elif self.flip and self.action == 3:
-            display.blit(pygame.transform.flip(self.image,self.flip,False), (self.rect.x - 7 , self.rect.y))
+        #elif self.flip and self.action == 3:
+            #display.blit(pygame.transform.flip(self.image,self.flip,False), (self.rect.x - 7 , self.rect.y))
         
-        else:
-            display.blit(pygame.transform.flip(self.image,self.flip,False), (self.rect.x , self.rect.y))
+        #else:
+        display.blit(pygame.transform.flip(self.image,self.flip,False), player_render_coordinates)
         if self.t_rect:
             pygame.draw.rect(display, (255,0,0), self.rect,  1)
             if self.flip:
