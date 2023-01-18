@@ -51,6 +51,7 @@ class Player(pygame.sprite.Sprite):
         self.moving_left = False
         self.gravity = 0.3
         self.air_timer = 0
+        self.on_ground = True
 
         #debug atributes
         self.t_rect = False
@@ -98,6 +99,7 @@ class Player(pygame.sprite.Sprite):
         self.width = self.rect.width
         self.height = self.rect.height
         #Check for collisions
+        test = True
         for tile in tile_rects:
             #Check collision in the x direction
             if tile[1].colliderect(self.rect.x + dx, self.rect.y,self.width, self.height):
@@ -108,12 +110,22 @@ class Player(pygame.sprite.Sprite):
                 if self.direction.y < 0:
                     self.direction.y = 0
                     dy = tile[1].bottom - self.rect.top
+                    
 
                 #check if above the ground i.e falling (ground collision)
                 elif self.direction.y >= 0:
                    self.direction.y = 0
                    dy = tile[1].top - self.rect.bottom
-                   self.air_timer = 0 
+                   #self.on_ground = True
+                   
+                
+            
+        #self.on_ground = not test
+        #if self.on_ground:
+        #    self.air_timer = 0
+        #else:
+        #    self.air_timer += 1
+       
         #update player postion
         self.rect.x += dx
         self.rect.y += dy 

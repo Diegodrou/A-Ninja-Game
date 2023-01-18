@@ -120,25 +120,29 @@ def Game(lvl):
     bullet_group = pygame.sprite.Group()
 
     #Game functions
-    def debug_stats():#Shows stats useful for debugging
+    def debug_stats(color):#Shows stats useful for debugging
         #Avg fps
         fps = str(int(clock.get_fps()))
-        fps_text = font.render(fps,1,pygame.Color('white'))
+        fps_text = font.render(fps,1,pygame.Color(color))
         #player.rect.x(left corner up)
         player_pos_x = 'x =' + str(player.rect.x)
-        player_pos_x_text = font.render(player_pos_x,1,pygame.Color('white'))
+        player_pos_x_text = font.render(player_pos_x,1,pygame.Color(color))
         #player.rect.y(left corner up)
         player_pos_y = 'y =' + str(player.rect.y)
-        player_pos_y_text = font.render(player_pos_y,1,pygame.Color('white'))
+        player_pos_y_text = font.render(player_pos_y,1,pygame.Color(color))
         #player's direction.y (vertical direction)
         player_y_direction ='vector_y =' + str(player.direction.y)
-        player_y_direction_text = font.render(player_y_direction,1,pygame.Color('white'))
+        player_y_direction_text = font.render(player_y_direction,1,pygame.Color(color))
         #player's direction.x(horizontal direction)
         player_x_direction = 'vector_x ='+ str(player.direction.x * player.speed)
-        player_x_direction_text = font.render(player_x_direction,1,pygame.Color('white'))
+        player_x_direction_text = font.render(player_x_direction,1,pygame.Color(color))
         #pos of the center of the player
         player_center = 'center ='+ str(player.rect.center)
-        player_center_x_text = font.render(player_center,1,pygame.Color('white'))
+        player_center_x_text = font.render(player_center,1,pygame.Color(color))
+
+        #air timer values
+        player_air_timer = "air_timer = " + str(player.air_timer)
+        player_air_timer_text = font.render(player_air_timer,1,pygame.Color(color))
 
         window.blit(fps_text,(10,0))
         window.blit(player_pos_x_text,(10,20))
@@ -146,6 +150,7 @@ def Game(lvl):
         window.blit(player_x_direction_text,(10,40))
         window.blit(player_y_direction_text,(10,60))
         window.blit(player_center_x_text,(10,80))
+        window.blit(player_air_timer_text,(10,100))
 
     def update_bullet_pos(tiles,player_rect, scroll):
         for item in bullet_group:
@@ -179,7 +184,7 @@ def Game(lvl):
                 if event.key == pygame.K_LEFT:
                     player.moving_left = True
                 if event.key in [K_SPACE,K_UP] :
-                    if player.air_timer < 6 :
+                    if player.air_timer < 3 :
                         player.jump()
 
             if event.type == pygame.KEYUP:
@@ -217,7 +222,7 @@ def Game(lvl):
         window.blit(pygame.transform.scale(display, WINDOW_SIZE), (0,0))
         
         if fps_toggle:
-            debug_stats()
+            debug_stats("Red")
 
         #check if game is paused
         if game_pause :

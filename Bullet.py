@@ -6,7 +6,7 @@ class Bullet(pygame.sprite.Sprite):
         self.image = pygame.Surface((3,2))
         self.image.fill((255,255,255))
         self.rect = self.image.get_rect(center = (start_position_x,start_position_y))
-        self.bullet_speed = 2
+        self.bullet_speed = 3
         self.enemy_direction = bullet_direction
 
     def update(self,tile_rects,player_rect,scroll):

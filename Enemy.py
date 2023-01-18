@@ -107,7 +107,7 @@ class Enemy(pygame.sprite.Sprite):
                     self.direction.x *= -1
                     self.move_counter *= -1
             if self.attack_state:
-                SHOOTING_COOLDOWN = 160
+                SHOOTING_COOLDOWN = 500
                 x_diff = self.rect.x - player_rect.x
                 self.movementANDcollisions(tile_rects)
                 if x_diff > 0: #check if player is at the left of the enemy
@@ -139,21 +139,23 @@ class Enemy(pygame.sprite.Sprite):
         #update animation
         ANIMATION_COOLDOWN = 150
         #update img depending on current frame
-        self.image = self.animation_list[self.action][self.index]
-        #check if enough time has passed since the last update
-        if pygame.time.get_ticks() - self.update_time > ANIMATION_COOLDOWN:
-            self.update_time = pygame.time.get_ticks()
-            self.index += 1
-            #if the animation has run out , reset back to the start
-            if self.index >= len(self.animation_list[self.action]):
-                self.index = 0
-        #changes actions
-        if not self.dead:
+        if not self.attack_state:
+            self.image = self.animation_list[self.action][self.index]
+            #check if enough time has passed since the last update
+            if pygame.time.get_ticks() - self.update_time > ANIMATION_COOLDOWN:
+                self.update_time = pygame.time.get_ticks()
+                self.index += 1
+                #if the animation has run out , reset back to the start
+                if self.index >= len(self.animation_list[self.action]):
+                    self.index = 0
+            #changes actions
+            if not self.dead:
 
-            if self.moving_right or self.moving_left:
-                    self.update_action(0)#0:run
- #           else:
- #                   self.update_action(0)#1:shooting
+                if self.moving_right or self.moving_left:
+                        self.update_action(0)#0:run
+        else:
+            self.index = 0
+
 
     def update_action(self, new_action):
         
@@ -170,7 +172,7 @@ class Enemy(pygame.sprite.Sprite):
             self.kill()
 
     def decide_enemy_state(self,player_rect):
-        if (player_rect.x <= (self.rect.x + right_threshold)) and (player_rect.x >= self.rect.x - left_threshold):
+        if (player_rect.x <= (self.rect.x + right_threshold)) and (player_rect.x >= self.rect.x - left_threshold) and (player_rect.y >= self.rect.top - 5):
             self.idle_state =False
             self.attack_state = True
         else:
