@@ -243,7 +243,7 @@ def Game(lvl):
                 Bullet = enemy.shoot()
                 bullet_group.add(Bullet)
             enemy.update(attack_rect, player.hit_enemy)
-
+        player.hit_enemy = False
         update_bullet_pos(tile_rects, player.rect, screen_scroll)
         # enemy.update(player)
 
