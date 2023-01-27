@@ -166,8 +166,8 @@ class Enemy(pygame.sprite.Sprite):
             self.index = 0
             self.update_time = pygame.time.get_ticks()
 
-    def check_dead(self,player_attacking):
-        if player_attacking:
+    def check_dead(self,players_attack_rect, player_hit):
+        if players_attack_rect.colliderect(self.rect) and player_hit :
             self.dead = True
             self.kill()
 
@@ -189,8 +189,8 @@ class Enemy(pygame.sprite.Sprite):
 
         
 
-    def update(self,player):
-        self.check_dead(player.hit_enemy)
+    def update(self,attack_rect, player_hit):
+        self.check_dead(attack_rect, player_hit)
         self.update_anim()
 
     def draw(self,display):

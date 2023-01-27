@@ -35,16 +35,18 @@ class World():
                     spawn = (x,y)
                     return spawn
     def enemy_spawn(self,lvl_layout):
+        spawns = []
         for row_index,row in enumerate(lvl_layout):
             for col_index,cell in enumerate(row):
                 if cell == 2:
                     x = col_index * TILE_SIZE
                     y = row_index * TILE_SIZE
                     spawn = (x,y)
-                    return spawn
+                    spawns.append(spawn)
+        return spawns
     
-    def scroll_x(self,world_shift):
-        self.tiles.update(world_shift)
+    #def scroll_x(self,world_shift):
+    #    self.tiles.update(world_shift)
 
     def draw(self,display,screenscroll):
         for tile in self.tile_rects:

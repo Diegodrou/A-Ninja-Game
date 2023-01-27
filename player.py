@@ -57,25 +57,35 @@ class Player(pygame.sprite.Sprite):
         # debug atributes
         self.t_rect = False
 
-    def attacks(self, target):
+    def attacks(self, targets):
         self.hit = False
         if self.flip:
-            attack_rect = pygame.Rect(self.rect.centerx, self.rect.y, self.ATTACK_RECT_W_WHEN_FLIPPED, self.rect.height)
+            attack_rect = pygame.Rect(
+                self.rect.centerx, self.rect.y, self.ATTACK_RECT_W_WHEN_FLIPPED, self.rect.height)
         else:
-            attack_rect = pygame.Rect(self.rect.centerx, self.rect.y, self.ATTACK_RECT_W, self.rect.height)
-        if attack_rect.colliderect(target):
-            if self.action == 3:  # so that it doenst happen while other animations are running
-                if self.hit_counter > 0:
-                    pass
-                else:
-                    self.hit_counter += 1
-                    print("hit")
-                    self.hit_enemy = True
+            attack_rect = pygame.Rect(
+                self.rect.centerx, self.rect.y, self.ATTACK_RECT_W, self.rect.height)
+        for rect in targets:
+            if attack_rect.colliderect(rect):
+                if self.action == 3:  # so that it doenst happen while other animations are running
+                    if self.hit_counter > 0:
+                        pass
+                    else:
+                        self.hit_counter += 1
+                        print("hit")
+                        self.hit_enemy = True
 
-    def movementANDcollisions(self, tile_rects, enemy_rect):
+    def movementANDcollisions(self, tile_rects, enemy_rects):
         # Reset movement variables
         dx = 0
         dy = 0
+        # attack collision variable
+        attack_rect = pygame.Rect(
+            self.rect.centerx, self.rect.y, self.ATTACK_RECT_W, self.rect.height)
+        if self.flip:
+            attack_rect = pygame.Rect(
+                self.rect.centerx, self.rect.y, self.ATTACK_RECT_W_WHEN_FLIPPED, self.rect.height)
+
         # gets inputs and the values that represent how much the player is gonna move
         if self.moving_left:
             self.direction.x = -1
@@ -87,10 +97,10 @@ class Player(pygame.sprite.Sprite):
             self.flip = False
          # attack inputs
         if self.attack:
-            self.attacks(enemy_rect)
+            self.attacks(enemy_rects)
             # self.attack = False
         # Apply gravity
-        
+
         self.direction.y += self.gravity
         if self.direction.y > 5:
             self.direction.y = 5
@@ -118,7 +128,7 @@ class Player(pygame.sprite.Sprite):
                     self.direction.y += -self.direction.y
                     dy = tile[1].top - self.rect.bottom
                     self.on_ground = True
-                    #print(self.direction.y)
+                    # print(self.direction.y)
 
         if self.on_ground:
             self.air_timer = 0
@@ -137,12 +147,12 @@ class Player(pygame.sprite.Sprite):
             screen_scroll = -dx
         else:
             screen_scroll = 0
-        return screen_scroll
+        return screen_scroll, attack_rect
 
     def jump(self):
         self.direction.y = self.jump_intensity
         self.on_ground = False
-        self.air_timer = 0 
+        self.air_timer = 0
 
     def update(self):
         self.update_anim()
@@ -207,7 +217,8 @@ class Player(pygame.sprite.Sprite):
     def draw(self, display):
         player_render_coordinates = self.find_player_surface_blit_coordinates()
 
-        display.blit(pygame.transform.flip(self.image, self.flip, False), player_render_coordinates)
+        display.blit(pygame.transform.flip(
+            self.image, self.flip, False), player_render_coordinates)
         if self.t_rect:
             pygame.draw.rect(display, (255, 0, 0), self.rect,  1)
             if self.flip:
