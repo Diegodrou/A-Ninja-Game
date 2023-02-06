@@ -161,7 +161,7 @@ class Player(pygame.sprite.Sprite):
     def update_anim(self):
 
         # update animation
-        ANIMATION_COOLDOWN = 150
+        ANIMATION_COOLDOWN = 100
         # update img depending on current frame
         self.image = self.animation_list[self.action][self.index]
         # if self.action == 1:
@@ -210,8 +210,7 @@ class Player(pygame.sprite.Sprite):
         middle_of_player_rect = self.rect.width/2
         middle_of_the_the_surface = image_width/2
         distance_between_middles = middle_of_the_the_surface - middle_of_player_rect
-        topleft_coordinates = (
-            self.rect.x - distance_between_middles, self.rect.y)
+        topleft_coordinates = (self.rect.x - distance_between_middles, self.rect.y)
         return topleft_coordinates
 
     def draw(self, display):

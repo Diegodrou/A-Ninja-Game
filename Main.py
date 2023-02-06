@@ -205,6 +205,8 @@ def Game(lvl):
                 if event.key == pygame.K_BACKSLASH:
                     fps_toggle = not fps_toggle
                     player.t_rect = not player.t_rect
+                    for enemy in enemy_sprites:
+                        enemy.debug = not enemy.debug
 
                 if event.key == pygame.K_ESCAPE:
                     if game_pause:

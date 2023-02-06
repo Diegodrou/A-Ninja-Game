@@ -22,6 +22,7 @@ class Enemy(pygame.sprite.Sprite):
         self.idle_state = True
         self.attack_state = False
         self.Shoot = False
+        self.debug = False
         self.update_time = pygame.time.get_ticks()
 
         #Animation related stuff
@@ -172,7 +173,7 @@ class Enemy(pygame.sprite.Sprite):
             self.kill()
 
     def decide_enemy_state(self,player_rect):
-        if (player_rect.x <= (self.rect.x + right_threshold)) and (player_rect.x >= self.rect.x - left_threshold) and (player_rect.y >= self.rect.top - 5):
+        if (player_rect.x <= (self.rect.x + right_threshold)) and (player_rect.x >= self.rect.x - left_threshold) and (player_rect.y >= self.rect.top - 5) and (player_rect.y < self.rect.bottom):
             self.idle_state =False
             self.attack_state = True
         else:
@@ -195,5 +196,6 @@ class Enemy(pygame.sprite.Sprite):
 
     def draw(self,display):
         display.blit(pygame.transform.flip(self.image,self.flip,False), (self.rect.x , self.rect.y))
-        display.blit(pygame.Surface((5,5)),(self.rect.x + right_threshold, self.rect.y))
-        display.blit(pygame.Surface((5,5)),(self.rect.x - left_threshold, self.rect.y))
+        if self.debug:
+            display.blit(pygame.Surface((5,5)),(self.rect.x + right_threshold, self.rect.y))
+            display.blit(pygame.Surface((5,5)),(self.rect.x - left_threshold, self.rect.y))
