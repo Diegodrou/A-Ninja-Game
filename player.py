@@ -141,10 +141,10 @@ class Player(pygame.sprite.Sprite):
 
         if self.rect.centerx > 210 and self.direction.x > 0:
             self.rect.x -= dx
-            screen_scroll = -dx
+            screen_scroll = -dx * self.speed
         elif self.rect.centerx < 50 and self.direction.x < 0:
             self.rect.x -= dx
-            screen_scroll = -dx
+            screen_scroll = -dx * self.speed
         else:
             screen_scroll = 0
         return screen_scroll, attack_rect

@@ -114,6 +114,7 @@ def Game(lvl):
     game_run = True
     DEAD_MESSAGE = 'Sry Bruh U Dead'
     DEAD_MESSAGE_TEXT = font2.render(DEAD_MESSAGE, 1, pygame.Color('Red'))
+    Scroll = 0
     # game instances
     world = World(lvl)
     player = Player(world.spawnpoint(lvl))
@@ -133,6 +134,33 @@ def Game(lvl):
         for enemy in enemy_sprites:
             enemy_rects.append(enemy.rect)
         return enemy_rects
+   
+   #Increments Scroll variable every frame depending on the player's input(side effect)
+    def scroll_input(Scroll):
+        key = pygame.key.get_pressed()
+        if key[pygame.K_LEFT] and Scroll > 0 and player.rect.centerx < 52:
+            Scroll -= 1.5
+        if key[pygame.K_RIGHT] and Scroll <3000 and player.rect.centerx > 208:
+            Scroll += 1.5
+
+        return Scroll
+
+    #Function draws background images with parallax effect applied(thx to the scroll_var) onto the display Surface(side effect)
+    #@param layers a list with the layers that make the background
+    #@param scroll_var whith the amount of pixels that the images have to move
+    #@return None 
+    def draw_background(layers:list[pygame.Surface],scroll_var:int):
+        speed = 2
+        SUN_SPEED = 0.01
+        display.blit(pygame.transform.scale(SKY,DISPLAY_SIZE),(0,0))
+        display.blit(pygame.transform.scale(sunCloud,DISPLAY_SIZE),(0 - Scroll*SUN_SPEED,0))
+        for i in layers:
+            for x in range(23):
+                i = pygame.transform.scale(i,DISPLAY_SIZE)
+                display.blit(i,((x * DISPLAY_SIZE[0]) - scroll_var * speed ,0))
+                speed += 0.01
+
+
 
     # Sprite group creation
     all_sprites = pygame.sprite.Group()
@@ -196,6 +224,8 @@ def Game(lvl):
     while game_run:
         clock.tick(FPS)
 
+        Scroll = scroll_input(Scroll)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -239,6 +269,7 @@ def Game(lvl):
         enemy_rects = get_enemy_rects(enemy_sprites)
         screen_scroll,attack_rect = player.movementANDcollisions(tile_rects, enemy_rects)
         player.update()
+
         for enemy in enemy_sprites:
             enemy.AI(player.rect, player.dead, tile_rects, screen_scroll)
             if enemy.Shoot:
@@ -246,17 +277,14 @@ def Game(lvl):
                 bullet_group.add(Bullet)
             enemy.update(attack_rect, player.hit_enemy)
         player.hit_enemy = False
+        
         update_bullet_pos(tile_rects, player.rect, screen_scroll)
-        # enemy.update(player)
 
         # - all draws -
+        draw_background(bg_layers,Scroll)
 
-        display.blit(pygame.transform.scale(
-            city_background, DISPLAY_SIZE), (0, 0))
         world.draw(display, screen_scroll)
 
-        # for item in all_sprites:
-        #     item.draw(display)
         player.draw(display)
 
         for bullet in bullet_group:
