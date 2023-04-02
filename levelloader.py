@@ -9,6 +9,14 @@ class World():
         self.setup_level(game_map)
         self.scroll = 0
 
+        #Size of the map in tiles
+        self.world_tile_width = len(game_map[0])
+        self.world_tile_height = len(game_map)
+        
+        #Size of the map in pixels
+        self.world_pixel_size = (self.world_tile_width * TILE_SIZE, self.world_tile_height * TILE_SIZE)
+
+
     def setup_level(self,lvl_layout):
         
         for row_index,row in enumerate(lvl_layout):
@@ -45,8 +53,7 @@ class World():
                     spawns.append(spawn)
         return spawns
     
-    #def scroll_x(self,world_shift):
-    #    self.tiles.update(world_shift)
+
 
     def draw(self,display,screenscroll):
         for tile in self.tile_rects:

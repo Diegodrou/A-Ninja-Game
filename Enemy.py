@@ -88,7 +88,7 @@ class Enemy(pygame.sprite.Sprite):
                    self.direction.y = 0
                    dy = tile[1].top - self.rect.bottom
                    self.air_timer = 0 
-        #update player postion
+        #update enemy postion
         self.rect.x += dx
         self.rect.y += dy 
 

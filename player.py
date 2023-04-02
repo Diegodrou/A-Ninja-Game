@@ -16,6 +16,7 @@ class Player(pygame.sprite.Sprite):
         # In consequence I have to make it bit shorter when flipped.
 
         self.hit_counter = 0  # get the number of times that the attack collider collided with the enemy collider during the attack animation
+        
         # animation related stuff
         self.animation_list = []
         self.index = 0
@@ -23,6 +24,8 @@ class Player(pygame.sprite.Sprite):
         self.attack = False
         self.hit_enemy = False
         self.update_time = pygame.time.get_ticks()
+
+
         # load idle anim frames/action 0
         animation_types = ['idle', 'run', 'jump', 'attack']
         for animation in animation_types:
@@ -37,8 +40,6 @@ class Player(pygame.sprite.Sprite):
             self.animation_list.append(temp_list)
 
         self.image = self.animation_list[self.action][self.index]
-        # self.rect = self.image.get_rect(topleft = pos)
-        # self.rect = self.rect.inflate(-11,0)
         self.rect = pygame.Rect(pos, (6, 16))
         self.width = self.image.get_width()
         self.height = self.image.get_height()
@@ -53,7 +54,7 @@ class Player(pygame.sprite.Sprite):
         self.gravity = 0.3
         self.air_timer = 0
         self.on_ground = True
-
+        self.side_collision = False
         # debug atributes
         self.t_rect = False
 
@@ -112,10 +113,12 @@ class Player(pygame.sprite.Sprite):
         # Check for collisions
         if self.direction.y > 0.9:
             self.on_ground = False
+        self.side_collision = False
         for tile in tile_rects:
             # Check collision in the x direction
             if tile[1].colliderect(self.rect.x + dx, self.rect.y, self.width, self.height):
                 dx = 0
+                self.side_collision = True
             # Check collision in the y direction
             if tile[1].colliderect(self.rect.x, self.rect.y + dy, self.width, self.height):
                 # check if below ground i.e. jumping(ceiling collision)
@@ -164,8 +167,7 @@ class Player(pygame.sprite.Sprite):
         ANIMATION_COOLDOWN = 100
         # update img depending on current frame
         self.image = self.animation_list[self.action][self.index]
-        # if self.action == 1:
-        # self.attack = False
+
         # check if enough time has passed since the last update
         if pygame.time.get_ticks() - self.update_time > ANIMATION_COOLDOWN:
             self.update_time = pygame.time.get_ticks()

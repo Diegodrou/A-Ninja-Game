@@ -1,108 +1,3 @@
-import pygame
-from pygame.locals import *
-from levelloader import World
-from settings import *
-from player import Player
-from buttons import *
-from Enemy import Enemy
-
-# Initialize Pygame and create window
-pygame.init()
-pygame.display.set_caption('A ninja game')
-
-# Creation of instances
-window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-display = pygame.Surface(DISPLAY_SIZE)
-clock = pygame.time.Clock()
-font = pygame.font.SysFont('Arial', 18)
-font2 = pygame.font.SysFont('Arial', 60)
-# Creation of button instances for menu
-resume_b = Button(10, 10, resume_b_img, 0.50)
-options_b = Button(10, 60, options_b_img, 0.50)
-quit_b = Button(10, 110, quit_b_img, 0.50)
-level_1_b = Button(250, 10, lvl_1_b_img, 0.50)
-back_b = Button(10, 360, back_b_img, 0.50)
-
-# Creation of button instances for paused menu
-quit_b_p = Button(270, 120, quit_b_img, 0.50)
-# Creation of button instances for dead menu
-resume_b_d = Button(150, 200, resume_b_img, 0.50)
-quit_b_d = Button(200, 240, quit_b_img, 0.50)
-
-# functions for the game
-
-
-def level_selection_menu():
-    # Menu variables
-    lvl_selector = True
-    anim_index = 0
-    BACKGROUND_ANIM = menu_bimages
-    MAIN_MENU_ANIM_COOLDOWN = 150
-    update_time_m = pygame.time.get_ticks()
-    # Menu_Loop
-    while lvl_selector:
-
-        # Pygame input
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-
-        # All Draws, and button instances
-        display.blit(pygame.transform.scale(
-            BACKGROUND_ANIM[anim_index], DISPLAY_SIZE), (0, 0))
-        window.blit(pygame.transform.scale(display, WINDOW_SIZE), (0, 0))
-        if level_1_b.draw(window):
-            lvl_selector = False
-            Game(lvls[0])
-
-        if back_b.draw(window):
-            lvl_selector = False
-            main_menu()
-
-        pygame.display.update()
-        if pygame.time.get_ticks() - update_time_m > MAIN_MENU_ANIM_COOLDOWN:
-            update_time_m = pygame.time.get_ticks()
-            if anim_index >= len(BACKGROUND_ANIM)-1:  # 24 frames in the animation
-                anim_index = 0
-            else:
-                anim_index += 1
-
-
-def main_menu():
-    # Menu variables
-    game_menu = True
-    anim_index = 0
-    BACKGROUND_ANIM = menu_bimages
-    MAIN_MENU_ANIM_COOLDOWN = 150
-    update_time_m = pygame.time.get_ticks()
-    # Menu_Loop
-    while game_menu:
-
-        # Pygame input
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-
-        # All Draws, and button instances
-        display.blit(pygame.transform.scale(
-            BACKGROUND_ANIM[anim_index], DISPLAY_SIZE), (0, 0))
-        window.blit(pygame.transform.scale(display, WINDOW_SIZE), (0, 0))
-        if resume_b.draw(window):
-            level_selection_menu()
-        if options_b.draw(window):
-            pass
-        if quit_b.draw(window):
-            pygame.quit
-            exit()
-        pygame.display.update()
-        if pygame.time.get_ticks() - update_time_m > MAIN_MENU_ANIM_COOLDOWN:
-            update_time_m = pygame.time.get_ticks()
-            if anim_index >= len(BACKGROUND_ANIM)-1:  # 24 frames in the animation
-                anim_index = 0
-            else:
-                anim_index += 1
 
 
 def Game(lvl):
@@ -175,7 +70,7 @@ def Game(lvl):
     # Shows stats useful for debugging(side effects)
     # @param color a string/or a Tuple containing 3 int values representing a color ex:"WHITE" or (255,255,255)
     # @return None
-    def debug_stats(color,screen_scroll):
+    def debug_stats(color):
         # Avg fps
         fps = str(int(clock.get_fps()))
         fps_text = font.render(fps, 1, pygame.Color(color))
@@ -213,10 +108,6 @@ def Game(lvl):
         on_ground = "on_ground = " + str(player.on_ground)
         on_ground_text = font.render(on_ground, 1, pygame.Color(color))
 
-        #screen_scroll value
-        screen_scroll_s = "screen_scroll = " + str(screen_scroll)
-        screen_scroll_text = font.render(screen_scroll_s,1,pygame.Color(color))
-
         window.blit(fps_text, (10, 0))
         window.blit(player_pos_x_text, (10, 20))
         window.blit(player_pos_y_text, (70, 20))
@@ -225,7 +116,6 @@ def Game(lvl):
         window.blit(player_center_x_text, (10, 80))
         window.blit(player_air_timer_text, (10, 100))
         window.blit(on_ground_text, (10, 120))
-        window.blit(screen_scroll_text,(10,140))
 
     # Updates bullets positions and checks for collisions(side effects)
     # @param tiles a list that contains all of the rects of the collidable tiles on the level
@@ -310,7 +200,7 @@ def Game(lvl):
         window.blit(pygame.transform.scale(display, WINDOW_SIZE), (0, 0))
 
         if fps_toggle:
-            debug_stats("Red",screen_scroll)
+            debug_stats("Red")
 
         # check if game is paused
         if game_pause:
@@ -333,6 +223,3 @@ def Game(lvl):
 
     pygame.quit()
     exit()
-
-main_menu()
-quit()
