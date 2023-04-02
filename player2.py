@@ -1,7 +1,7 @@
 import pygame
 import os
 
-from settings import WINDOW_SIZE
+from settings2 import WINDOW_SIZE
 
 
 class Player(pygame.sprite.Sprite):

@@ -2,7 +2,7 @@ import pygame
 import os
 from Bullet import Bullet
 
-from settings import WINDOW_SIZE
+from settings2 import WINDOW_SIZE
 
 left_threshold = 80
 right_threshold = 90

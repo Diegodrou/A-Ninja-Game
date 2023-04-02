@@ -1,8 +1,8 @@
 import pygame
 from pygame.locals import *
 from levelloader import World
-from settings import *
-from player import Player
+from settings2 import *
+from player2 import Player
 from buttons import *
 from Enemy import Enemy
 

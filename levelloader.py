@@ -1,4 +1,4 @@
-from settings import TILE_SIZE, tiles_imgs
+from settings2 import TILE_SIZE, tiles_imgs
 import pygame
 
 
