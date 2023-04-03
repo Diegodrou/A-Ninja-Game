@@ -1,4 +1,4 @@
-import pygame
+import pygame,time
 from settings import *
 from sprites import *
 
@@ -23,12 +23,15 @@ class Game():
     def run(self):
         #Game Loop
         self.playing = True
+        self.prev_time = self.get_time()
         while self.playing:
-            self.clock.tick(fps)
+            self.dt = self.get_deltaTime()
+            self.prev_time = self.get_time()
+
             self.events()
             self.update()
             self.draw()
-        
+            self.clock.tick(fps)
 
     def events(self):
         #Game Loop: - Events
@@ -56,9 +59,18 @@ class Game():
             self.debug("white")
         
         pygame.display.update()
+    
+    #Gets current time
+    def get_time(self):
+        return time.time()
+    
+    #Gets time since last frame (dt)
+    def get_deltaTime(self):
+        return self.get_time() - self.prev_time 
 
     def menu_screen(self):
-        pass
+        game_menu = True
+        anim_index = 0
 
     def pause_screen(self):
         pass

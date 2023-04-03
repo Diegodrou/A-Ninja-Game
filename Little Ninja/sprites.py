@@ -23,22 +23,33 @@ class Player(pygame.sprite.Sprite):
         self.gravity = 0.3
         self.air_timer = 0
 
+
+    #Player's logic related methods
+    def update(self):
+        self.get_input()
+        self.move()
+        self.collisions()
+    
     def move(self):
         pass
-
-    def update(self):
+    
+    def get_input(self):
         pass
 
-    def find_blit_coordinates(self):
-        middle_of_current_surface = (self.image.get_width())/2
-        middle_of_current_rect = self.rect.width/2
-        distance_between_middles = middle_of_current_surface - middle_of_current_rect
-        return (self.rect.x - distance_between_middles, self.rect.y)
-
-    def draw(self):
-        pass        
-
+    def collisions(self):
+        pass
     
+    #Player's rendering related methods
+    def draw(self):
+        pass       
+    
+    def find_blit_coordinates(self):
+            middle_of_current_surface = (self.image.get_width())/2
+            middle_of_current_rect = self.rect.width/2
+            distance_between_middles = middle_of_current_surface - middle_of_current_rect
+            return (self.rect.x - distance_between_middles, self.rect.y)
+
+    #Player's loading methods
     def load_player_assets(self,animation_types:list[str]):
         animation_list = []
         for animation in animation_types:
