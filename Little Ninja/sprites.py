@@ -1,18 +1,25 @@
 import pygame
 import os
+from settings import *
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, start_position:tuple):
-        
-        #player sprite and animation attributes
+    def __init__(self, game_attritues, spawn_pos:tuple):
+        self.groups = game_attritues.all_sprites
+        #The class constructor (__init__ method) takes an argument of a Group (or list of Groups) the Sprite instance should belong to. 
+        pygame.sprite.Sprite.__init__(self,self.groups)
+        #Player sprite and animation attributes
         self.ANIMATION_TYPES = ['idle', 'run', 'jump', 'attack']
         self.animation_list =  self.load_player_assets(self.ANIMATION_TYPES)
         self.index = 0
         self.action = 0
         self.image = self.animation_list[self.action][self.index]
-        self.rect = pygame.Rect(start_position, (6, 16))
+        self.rect = pygame.Rect(spawn_pos, (6, 16))
         self.width = self.image.get_width()
         self.height = self.image.get_height()
+        
+        #Player pos attributes
+        self.x = spawn_pos[0]
+        self.y = spawn_pos[1]
 
         #Player Movement attributes
         self.direction = pygame.math.Vector2(0, 0)
@@ -69,5 +76,16 @@ class Enemy(pygame.sprite.Sprite):
         pass
 
 class Tile(pygame.sprite.Sprite):
-    def __init__(self, start_position:tuple):
-        pass
+    def __init__(self, game_attributes, image:pygame.Surface, spawn_pos:tuple):
+        self.groups = game_attributes.all_sprites, game_attributes.all_tiles
+        #The class constructor (__init__ method) takes an argument of a Group (or list of Groups) the Sprite instance should belong to. 
+        pygame.sprite.Sprite.__init__(self,self.groups)
+        self.x = spawn_pos[0]
+        self.y = spawn_pos[1]
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.x = spawn_pos[0] * TILE_SIZE
+        self.rect.y = spawn_pos[1] * TILE_SIZE
+
+
+

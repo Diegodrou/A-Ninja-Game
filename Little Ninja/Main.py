@@ -1,7 +1,8 @@
-import pygame,time,os
+import pygame,time,os,pickle
 from settings import *
 from sprites import *
 from boton import Boton
+from map import Map
 
 class Game():
     def __init__(self):
@@ -16,11 +17,16 @@ class Game():
         self.debug_on = True
         self.ASSETS = {}
         self.load_assets()
-    
+        self.LEVELS = self.load_levels()
+
     def new_game(self,level:int):
         #Start a new game
         self.all_sprites = pygame.sprite.Group()
-        #self.player = Player(map.spawn(level))
+        self.all_tiles = pygame.sprite.Group()
+        map = Map(self.LEVELS[level])
+        self.setup_level(map.data)
+        
+
         self.run()
 
     def run(self):
@@ -43,13 +49,16 @@ class Game():
                 if self.playing:
                     self.playing = False
                 self.running = False
-
+    
+    #updates all the game's logic
     def update(self):
         #Game Loop: - Update
         self.all_sprites.update()
     
+    #Renders everything 
     def draw(self):
         #Game Loop: - Draw
+        self.all_sprites.draw(self.display)
         
         #Things drawn in the display
         self.display.fill(DARKGREY)
@@ -107,8 +116,9 @@ class Game():
             
             if self.debug_on:
                 self.debug()
+            
             pygame.display.update()
-            self.clock.tick(75)
+            self.clock.tick(fps)
             
             if (self.get_time() - update_time_m > MAIN_MENU_ANIM_COOLDOWN):
                 update_time_m = self.get_time()
@@ -134,15 +144,18 @@ class Game():
         fps_text = font.render(fps, 1, pygame.Color("coral"))
         return fps_text
     
-    #loads menu background assets and game background assets
+    #loads menu background /game background / botones/ tile image assets
     def load_assets(self):
         menu_images = []
         bg_frames = []
         botones_images = []
+        tiles = []
 
         nb_bg_frames = len(os.listdir(f"images/background_imgs"))
         nb_menu_frames = len(os.listdir(f"images/menu_imgs"))
         nb_botones = len(os.listdir(f"images/botones"))
+        nb_tiles = len(os.listdir(f"images/tiles"))
+        
 
         #loads menu_frames
         for i in range(nb_bg_frames):
@@ -155,13 +168,37 @@ class Game():
         #load imagenes de botones
         for j in range(nb_botones):
             botones_images.append(pygame.image.load(f"images/botones/{j}.png"))
+        
+        #Load tile images
+        for h in range(nb_tiles):
+            tiles.append(pygame.image.load(f"images/tiles/{h}.png").convert())
 
 
         self.ASSETS["BOTONES_IMGS"] = botones_images
         self.ASSETS["MENU_FRAMES"] = menu_images
         self.ASSETS["BG_FRAMES"] = bg_frames
+        self.ASSETS["TILES"] = tiles
+    
+    #loods levels using pickle library  
+    def load_levels(self):
+        lvls = []
+        nb_levels = len(os.listdir(f"Levels"))
+        for k in range (nb_levels):
+                pickle_in = open(f'Levels/level{k}_data', 'rb')
+                lvl = pickle.load(pickle_in)
+                lvls.append(lvl)
         
+        return lvls
 
+    def setup_level(self,map_layout):
+        for row,tiles in enumerate(map_layout):
+            for col, tile in enumerate(tiles):
+                if tile == 0:
+                    Tile(self, self.ASSETS["TILES"][0], (col,row))
+                if tile == 1:
+                    pass
+                if tile == 2:
+                    pass   
 
     def draw_grid(self,color:str):
         for x in range(0, window_width, TILE_SIZE):
