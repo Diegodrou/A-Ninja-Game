@@ -58,7 +58,6 @@ class Game():
     #Renders everything 
     def draw(self):
         #Game Loop: - Draw
-        self.all_sprites.draw(self.display)
         
         #Things drawn in the display
         self.display.fill(DARKGREY)
