@@ -49,6 +49,18 @@ class Game():
                 if self.playing:
                     self.playing = False
                 self.running = False
+
+            if event.type == pygame.KEYDOWN:    
+                if event.key == pygame.K_RIGHT:
+                        self.player.moving_right = True
+                if event.key == pygame.K_LEFT:
+                        self.player.moving_left = True
+
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_RIGHT:
+                    self.player.moving_right = False
+                if event.key == pygame.K_LEFT:
+                    self.player.moving_left = False
     
     #updates all the game's logic
     def update(self):
@@ -195,9 +207,9 @@ class Game():
                 if tile == 0:
                     Tile(self, self.ASSETS["TILES"][0], (col,row))
                 if tile == 1:
-                    pass
+                    self.player = Player(self,(col * TILE_SIZE, row * TILE_SIZE))
                 if tile == 2:
-                    pass   
+                    pass
 
     def draw_grid(self,color:str):
         for x in range(0, window_width, TILE_SIZE):

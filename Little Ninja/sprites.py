@@ -18,8 +18,7 @@ class Player(pygame.sprite.Sprite):
         self.height = self.image.get_height()
         
         #Player pos attributes
-        self.x = spawn_pos[0]
-        self.y = spawn_pos[1]
+        self.pos = pygame.math.Vector2(spawn_pos[0],spawn_pos[1])
 
         #Player Movement attributes
         self.direction = pygame.math.Vector2(0, 0)
@@ -41,14 +40,20 @@ class Player(pygame.sprite.Sprite):
         pass
     
     def get_input(self):
-        pass
+        if self.moving_left:
+            self.direction.x = -1
+
+        if self.moving_right:
+            self.direction.x = 1
 
     def collisions(self):
         pass
     
     #Player's rendering related methods
     def draw(self):
-        pass       
+        pass
+        
+
     
     def find_blit_coordinates(self):
             middle_of_current_surface = (self.image.get_width())/2
@@ -65,7 +70,7 @@ class Player(pygame.sprite.Sprite):
             # count number of files in the folder
             num_of_frames = len(os.listdir(f'images/player_imgs/{animation}'))
             for i in range(num_of_frames):
-                p_img = pygame.image.load(os.path.join("images", "players_imgs", animation, f'{i}.png'))
+                p_img = pygame.image.load(os.path.join("images", "player_imgs", animation, f'{i}.png'))
                 temp_list.append(p_img)
             animation_list.append(temp_list)
         return animation_list
@@ -87,5 +92,5 @@ class Tile(pygame.sprite.Sprite):
         self.rect.x = spawn_pos[0] * TILE_SIZE
         self.rect.y = spawn_pos[1] * TILE_SIZE
 
-
-
+    def draw(self):
+        pass
