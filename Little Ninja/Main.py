@@ -1,4 +1,5 @@
 import pygame,time,os,pickle
+from pygame.locals import *
 from settings import *
 from sprites import *
 from boton import Boton
@@ -40,7 +41,7 @@ class Game():
             self.events()
             self.update()
             self.draw()
-            self.clock.tick(fps)
+            self.clock.tick(600)
 
     def events(self):
         #Game Loop: - Events
@@ -55,12 +56,16 @@ class Game():
                         self.player.moving_right = True
                 if event.key == pygame.K_LEFT:
                         self.player.moving_left = True
+                if event.key in [K_SPACE, K_UP]:
+                    if self.player.air_timer < 7:
+                        self.player.jump()
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_RIGHT:
                     self.player.moving_right = False
                 if event.key == pygame.K_LEFT:
                     self.player.moving_left = False
+                
     
     #updates all the game's logic
     def update(self):

@@ -7,6 +7,7 @@ class Player(pygame.sprite.Sprite):
         self.groups = game_attritues.all_sprites
         #The class constructor (__init__ method) takes an argument of a Group (or list of Groups) the Sprite instance should belong to. 
         pygame.sprite.Sprite.__init__(self,self.groups)
+        self.game = game_attritues
         #Player sprite and animation attributes
         self.ANIMATION_TYPES = ['idle', 'run', 'jump', 'attack']
         self.animation_list =  self.load_player_assets(self.ANIMATION_TYPES)
@@ -17,38 +18,58 @@ class Player(pygame.sprite.Sprite):
         self.width = self.image.get_width()
         self.height = self.image.get_height()
         
-        #Player pos attributes
-        self.pos = pygame.math.Vector2(spawn_pos[0],spawn_pos[1])
+        #Player movement vector
+        self.d = pygame.math.Vector2(spawn_pos[0],spawn_pos[1])
 
         #Player Movement attributes
         self.direction = pygame.math.Vector2(0, 0)
-        self.speed = 2
+        self.speed = 200
         self.moving_right = False
         self.moving_left = False
-        self.jump_intensity = -6
-        self.gravity = 0.3
+        self.jump_intensity = -3000
+        self.gravity = 100
         self.air_timer = 0
 
 
-    #Player's logic related methods
+    #Player's logic related methods(SE)
     def update(self):
         self.get_input()
+        self.apply_gravity()
+        #self.collisions()
         self.move()
-        self.collisions()
-    
+        
+    #Moves the player to the coordinates  the d vector points at(SE)
     def move(self):
-        pass
+        self.rect.x = round(self.d.x)
+        self.rect.y = round(self.d.y)
     
+    #Checks for player input and sets d vector accordingly(SE)
     def get_input(self):
         if self.moving_left:
             self.direction.x = -1
 
-        if self.moving_right:
+        elif self.moving_right:
             self.direction.x = 1
+        else:
+            self.direction.x = 0
+    
+
+        self.d.x += self.direction.x * self.speed * self.game.dt
 
     def collisions(self):
         pass
     
+    def apply_gravity(self):
+        self.direction.y += self.gravity
+        if self.direction.y > 100:
+            self.direction.y = 100
+        
+        self.d.y += self.direction.y * self.game.dt
+
+    def jump(self):
+        self.direction.y = self.jump_intensity
+        self.air_timer = 0
+
     #Player's rendering related methods
     def draw(self):
         pass
