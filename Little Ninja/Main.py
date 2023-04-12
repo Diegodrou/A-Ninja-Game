@@ -31,6 +31,7 @@ class Game():
         self.run()
 
     def run(self):
+        
         #Game Loop
         self.playing = True
         self.prev_time = self.get_time()
@@ -70,7 +71,8 @@ class Game():
     #updates all the game's logic
     def update(self):
         #Game Loop: - Update
-        self.all_sprites.update()
+        for sprite in self.all_sprites:
+            sprite.update()
     
     #Renders everything 
     def draw(self):
@@ -78,7 +80,8 @@ class Game():
         
         #Things drawn in the display
         self.display.fill(DARKGREY)
-        self.all_sprites.draw(self.display)
+        for sprite in self.all_sprites:
+            sprite.draw(self.display)
         
         #Things drawn in the window
         self.window.blit(pygame.transform.scale(self.display, window_size), (0, 0))
@@ -130,8 +133,6 @@ class Game():
             
             level_1_b.draw(self.window)
             
-            if self.debug_on:
-                self.debug()
             
             pygame.display.update()
             self.clock.tick(fps)
@@ -150,15 +151,37 @@ class Game():
 
     def death_screen(self):
         pass
-
+    
     def debug(self):
         self.window.blit(self.update_fps(),(10,10))
+        self.window.blit(self.show_playerMoveVector(),(10,30))
+        self.window.blit(self.show_DeltaTime(),(10,50))
+        self.window.blit(self.show_player_pos(),(10,70))
 
     def update_fps(self):
         font = pygame.font.SysFont("Arial", 18)
         fps = str(int(self.clock.get_fps()))
         fps_text = font.render(fps, 1, pygame.Color("coral"))
         return fps_text
+    
+    def show_playerMoveVector(self):
+       font = pygame.font.SysFont("Arial", 18) 
+       move_vector = "velocity : "+ str(self.player.velocity)
+       move_vector_txt = font.render(move_vector, 1, pygame.Color("coral"))
+       return move_vector_txt
+    
+    def show_player_pos(self):
+        font = pygame.font.SysFont("Arial", 18)
+        xy = "x: " + str(self.player.rect.x) + " y: " + str(self.player.rect.y) 
+        xy_text = font.render(xy,1,pygame.Color("coral"))
+        return xy_text
+
+    
+    def show_DeltaTime(self):
+       font = pygame.font.SysFont("Arial", 18) 
+       deltaTime = str(self.dt)
+       deltaTime_txt = font.render(deltaTime, 1, pygame.Color("coral"))
+       return deltaTime_txt
     
     #loads menu background /game background / botones/ tile image assets
     def load_assets(self):
@@ -212,7 +235,7 @@ class Game():
                 if tile == 0:
                     Tile(self, self.ASSETS["TILES"][0], (col,row))
                 if tile == 1:
-                    self.player = Player(self,(col * TILE_SIZE, row * TILE_SIZE))
+                    self.player = Player(self,(col, row ))
                 if tile == 2:
                     pass
 

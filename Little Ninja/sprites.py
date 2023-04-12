@@ -14,65 +14,71 @@ class Player(pygame.sprite.Sprite):
         self.index = 0
         self.action = 0
         self.image = self.animation_list[self.action][self.index]
-        self.rect = pygame.Rect(spawn_pos, (6, 16))
+        self.rect = pygame.Rect((0,0), (6, 16))
         self.width = self.image.get_width()
         self.height = self.image.get_height()
         
-        #Player movement vector
-        self.d = pygame.math.Vector2(spawn_pos[0],spawn_pos[1])
-
         #Player Movement attributes
-        self.direction = pygame.math.Vector2(0, 0)
+        self.velocity  = pygame.math.Vector2(0,0) 
         self.speed = 200
         self.moving_right = False
         self.moving_left = False
-        self.jump_intensity = -3000
-        self.gravity = 100
+        self.jump_intensity = -100
+        self.gravity = 50
         self.air_timer = 0
+
+        self.x = spawn_pos[0] * TILE_SIZE
+        self.y = spawn_pos[1] * TILE_SIZE
 
 
     #Player's logic related methods(SE)
     def update(self):
         self.get_input()
-        self.apply_gravity()
+        #self.apply_gravity()
         #self.collisions()
         self.move()
         
+        
     #Moves the player to the coordinates  the d vector points at(SE)
     def move(self):
-        self.rect.x = round(self.d.x)
-        self.rect.y = round(self.d.y)
+        self.x += self.velocity.x * self.game.dt
+        self.y += self.velocity.y * self.game.dt
+        self.rect.x =  round(self.x)
+        self.collide_with_tile('x')
+        self.rect.y = self.y
     
     #Checks for player input and sets d vector accordingly(SE)
     def get_input(self):
+        self.velocity.x, self.velocity.y = 0, 0 
+
         if self.moving_left:
-            self.direction.x = -1
+            self.velocity.x = -self.speed
 
         elif self.moving_right:
-            self.direction.x = 1
-        else:
-            self.direction.x = 0
-    
+            self.velocity.x = self.speed 
 
-        self.d.x += self.direction.x * self.speed * self.game.dt
+            
 
-    def collisions(self):
-        pass
+    def collide_with_tile(self, dir):
+        if dir == 'x':
+            hits = pygame.sprite.spritecollide(self,self.game.all_tiles,False)
+            if hits:
+                if self.velocity.x > 0:#Moving to the right when collided
+                    self.x = hits[0].rect.left - self.rect.width
+                if self.velocity.x < 0:
+                    self.x = hits[0].rect.right
+                self.velocity.x = 0
+                self.rect.x = self.x 
     
-    def apply_gravity(self):
-        self.direction.y += self.gravity
-        if self.direction.y > 100:
-            self.direction.y = 100
-        
-        self.d.y += self.direction.y * self.game.dt
 
     def jump(self):
-        self.direction.y = self.jump_intensity
+        self.velocity.y += self.jump_intensity
         self.air_timer = 0
 
     #Player's rendering related methods
-    def draw(self):
-        pass
+    def draw(self, display):
+        display.blit(self.image,(self.rect.x, self.rect.y))
+        pygame.draw.rect(display, (255,0,0), self.rect, 1)
         
 
     
@@ -113,5 +119,5 @@ class Tile(pygame.sprite.Sprite):
         self.rect.x = spawn_pos[0] * TILE_SIZE
         self.rect.y = spawn_pos[1] * TILE_SIZE
 
-    def draw(self):
-        pass
+    def draw(self,display):
+        display.blit(self.image,(self.rect.x,self.rect.y ))
