@@ -151,12 +151,13 @@ class Game():
 
     def death_screen(self):
         pass
-    
+    #Debug functions
     def debug(self):
         self.window.blit(self.update_fps(),(10,10))
         self.window.blit(self.show_playerMoveVector(),(10,30))
         self.window.blit(self.show_DeltaTime(),(10,50))
         self.window.blit(self.show_player_pos(),(10,70))
+        self.window.blit(self.show_jumping(),(10,100))
 
     def update_fps(self):
         font = pygame.font.SysFont("Arial", 18)
@@ -183,6 +184,14 @@ class Game():
        deltaTime_txt = font.render(deltaTime, 1, pygame.Color("coral"))
        return deltaTime_txt
     
+    def show_jumping(self):
+        font = pygame.font.SysFont("Arial", 18)
+        jumping = "jumpbool : " + str(self.player.jumping)
+        jumping_txt = font.render(jumping, 1 , pygame.Color("coral")) 
+        return jumping_txt
+
+    #Loading functions
+
     #loads menu background /game background / botones/ tile image assets
     def load_assets(self):
         menu_images = []
@@ -238,12 +247,6 @@ class Game():
                     self.player = Player(self,(col, row ))
                 if tile == 2:
                     pass
-
-    def draw_grid(self,color:str):
-        for x in range(0, window_width, TILE_SIZE):
-            pygame.draw.line(self.window , color, (x,0) ,(x,window_height) )
-        for y in range(0,window_height, TILE_SIZE):
-            pygame.draw.line(self.window, color, (0,y), (window_width,y) )
 
 
 G = Game()

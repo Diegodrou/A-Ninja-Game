@@ -20,11 +20,13 @@ class Player(pygame.sprite.Sprite):
         
         #Player Movement attributes
         self.velocity  = pygame.math.Vector2(0,0) 
+        self.y_current_value = 0
         self.speed = 200
         self.moving_right = False
         self.moving_left = False
-        self.jump_intensity = -100
-        self.gravity = 50
+        self.jump_intensity = -200
+        self.jumping = False
+        self.gravity = 13
         self.air_timer = 0
 
         self.x = spawn_pos[0] * TILE_SIZE
@@ -34,20 +36,20 @@ class Player(pygame.sprite.Sprite):
     #Player's logic related methods(SE)
     def update(self):
         self.get_input()
-        #self.apply_gravity()
+        self.apply_gravity()
         #self.collisions()
         self.move()
         
         
-    #Moves the player to the coordinates  the d vector points at(SE)
+    #Moves the player to the coordinates  the velocity vector points at(SE)
     def move(self):
         self.x += self.velocity.x * self.game.dt
         self.y += self.velocity.y * self.game.dt
         self.rect.x =  round(self.x)
-        self.collide_with_tile('x')
-        self.rect.y = self.y
+        self.check_collision_with_tile('x')
+        self.rect.y = round(self.y)
     
-    #Checks for player input and sets d vector accordingly(SE)
+    #Checks for player input and sets velocity in the x axis accordingly(SE)
     def get_input(self):
         self.velocity.x, self.velocity.y = 0, 0 
 
@@ -55,26 +57,34 @@ class Player(pygame.sprite.Sprite):
             self.velocity.x = -self.speed
 
         elif self.moving_right:
-            self.velocity.x = self.speed 
+            self.velocity.x = self.speed
+
+        if self.jumping:
+            self.velocity.y = self.jump_intensity
+            self.jumping = False
 
             
 
-    def collide_with_tile(self, dir):
+    def check_collision_with_tile(self, dir):
         if dir == 'x':
             hits = pygame.sprite.spritecollide(self,self.game.all_tiles,False)
             if hits:
                 if self.velocity.x > 0:#Moving to the right when collided
                     self.x = hits[0].rect.left - self.rect.width
-                if self.velocity.x < 0:
+                if self.velocity.x < 0:#Moving to the left when collided
                     self.x = hits[0].rect.right
                 self.velocity.x = 0
                 self.rect.x = self.x 
     
-
     def jump(self):
-        self.velocity.y += self.jump_intensity
-        self.air_timer = 0
+            self.y_current_value = self.jump_intensity
 
+    def apply_gravity(self):
+        self.y_current_value += self.gravity
+        if self.y_current_value > 50:
+            self.y_current_value = 50
+        self.velocity.y += self.y_current_value
+    
     #Player's rendering related methods
     def draw(self, display):
         display.blit(self.image,(self.rect.x, self.rect.y))
