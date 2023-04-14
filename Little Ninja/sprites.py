@@ -24,9 +24,9 @@ class Player(pygame.sprite.Sprite):
         self.speed = 200
         self.moving_right = False
         self.moving_left = False
-        self.jump_intensity = -200
+        self.jump_intensity = -500
         self.jumping = False
-        self.gravity = 13
+        self.gravity = 15
         self.air_timer = 0
 
         self.x = spawn_pos[0] * TILE_SIZE
@@ -48,6 +48,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.x =  round(self.x)
         self.check_collision_with_tile('x')
         self.rect.y = round(self.y)
+        self.check_collision_with_tile('y')
     
     #Checks for player input and sets velocity in the x axis accordingly(SE)
     def get_input(self):
@@ -57,13 +58,7 @@ class Player(pygame.sprite.Sprite):
             self.velocity.x = -self.speed
 
         elif self.moving_right:
-            self.velocity.x = self.speed
-
-        if self.jumping:
-            self.velocity.y = self.jump_intensity
-            self.jumping = False
-
-            
+            self.velocity.x = self.speed            
 
     def check_collision_with_tile(self, dir):
         if dir == 'x':
@@ -75,6 +70,15 @@ class Player(pygame.sprite.Sprite):
                     self.x = hits[0].rect.right
                 self.velocity.x = 0
                 self.rect.x = self.x 
+        if dir == 'y':
+            hits = pygame.sprite.spritecollide(self,self.game.all_tiles,False)
+            if hits:
+                if self.velocity.y > 0:#Moving down when collided
+                    self.y = hits[0].rect.top - self.rect.height
+                if self.velocity.y < 0:#Moving up when collided
+                    self.y = hits[0].rect.bottom
+                self.velocity.y = 0
+                self.rect.y = self.y 
     
     def jump(self):
             self.y_current_value = self.jump_intensity

@@ -42,7 +42,7 @@ class Game():
             self.events()
             self.update()
             self.draw()
-            self.clock.tick(600)
+            self.clock.tick(60)
 
     def events(self):
         #Game Loop: - Events
@@ -157,7 +157,6 @@ class Game():
         self.window.blit(self.show_playerMoveVector(),(10,30))
         self.window.blit(self.show_DeltaTime(),(10,50))
         self.window.blit(self.show_player_pos(),(10,70))
-        self.window.blit(self.show_jumping(),(10,100))
 
     def update_fps(self):
         font = pygame.font.SysFont("Arial", 18)
@@ -183,12 +182,7 @@ class Game():
        deltaTime = str(self.dt)
        deltaTime_txt = font.render(deltaTime, 1, pygame.Color("coral"))
        return deltaTime_txt
-    
-    def show_jumping(self):
-        font = pygame.font.SysFont("Arial", 18)
-        jumping = "jumpbool : " + str(self.player.jumping)
-        jumping_txt = font.render(jumping, 1 , pygame.Color("coral")) 
-        return jumping_txt
+
 
     #Loading functions
 
