@@ -157,6 +157,7 @@ class Game():
         self.window.blit(self.show_playerMoveVector(),(10,30))
         self.window.blit(self.show_DeltaTime(),(10,50))
         self.window.blit(self.show_player_pos(),(10,70))
+        self.window.blit(self.show_Y_current(),(10,100))
 
     def update_fps(self):
         font = pygame.font.SysFont("Arial", 18)
@@ -179,11 +180,16 @@ class Game():
     
     def show_DeltaTime(self):
        font = pygame.font.SysFont("Arial", 18) 
-       deltaTime = str(self.dt)
+       deltaTime = str((self.dt) * 1000) + " ms"
        deltaTime_txt = font.render(deltaTime, 1, pygame.Color("coral"))
        return deltaTime_txt
+    
 
-
+    def show_Y_current(self):
+       font = pygame.font.SysFont("Arial", 18) 
+       Y_c = "Y_c: " + str(self.player.y_current_value)
+       Y_c_txt = font.render(Y_c, 1, pygame.Color("coral"))
+       return Y_c_txt
     #Loading functions
 
     #loads menu background /game background / botones/ tile image assets

@@ -21,12 +21,12 @@ class Player(pygame.sprite.Sprite):
         #Player Movement attributes
         self.velocity  = pygame.math.Vector2(0,0) 
         self.y_current_value = 0
-        self.speed = 200
+        self.speed = 215
         self.moving_right = False
         self.moving_left = False
-        self.jump_intensity = -500
+        self.jump_intensity = -300
         self.jumping = False
-        self.gravity = 15
+        self.gravity = 830
         self.air_timer = 0
 
         self.x = spawn_pos[0] * TILE_SIZE
@@ -37,7 +37,6 @@ class Player(pygame.sprite.Sprite):
     def update(self):
         self.get_input()
         self.apply_gravity()
-        #self.collisions()
         self.move()
         
         
@@ -78,15 +77,16 @@ class Player(pygame.sprite.Sprite):
                 if self.velocity.y < 0:#Moving up when collided
                     self.y = hits[0].rect.bottom
                 self.velocity.y = 0
+                self.y_current_value = 0
                 self.rect.y = self.y 
     
     def jump(self):
             self.y_current_value = self.jump_intensity
 
     def apply_gravity(self):
-        self.y_current_value += self.gravity
-        if self.y_current_value > 50:
-            self.y_current_value = 50
+        self.y_current_value += self.gravity * self.game.dt
+        if self.y_current_value > 1500:
+            self.y_current_value = 1500
         self.velocity.y += self.y_current_value
     
     #Player's rendering related methods
