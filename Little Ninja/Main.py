@@ -160,7 +160,7 @@ class Game():
         self.window.blit(self.show_Y_current(),(10,100))
 
     def update_fps(self):
-        font = pygame.font.SysFont("Arial", 18)
+        font = pygame.font.SysFont("Arial",18)
         fps = str(int(self.clock.get_fps()))
         fps_text = font.render(fps, 1, pygame.Color("coral"))
         return fps_text
@@ -180,7 +180,7 @@ class Game():
     
     def show_DeltaTime(self):
        font = pygame.font.SysFont("Arial", 18) 
-       deltaTime = str((self.dt) * 1000) + " ms"
+       deltaTime = str(round((self.dt) * 1000)) + " ms"
        deltaTime_txt = font.render(deltaTime, 1, pygame.Color("coral"))
        return deltaTime_txt
     
