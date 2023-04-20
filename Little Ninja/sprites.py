@@ -14,7 +14,8 @@ class Player(pygame.sprite.Sprite):
         self.index = 0
         self.action = 0
         self.image = self.animation_list[self.action][self.index]
-        self.rect = pygame.Rect((0,0), (6, 16))
+        self.rect = pygame.Rect((0,0), (13, 16))
+        self.flip = False
         self.width = self.image.get_width()
         self.height = self.image.get_height()
         
@@ -55,9 +56,11 @@ class Player(pygame.sprite.Sprite):
 
         if self.moving_left:
             self.velocity.x = -self.speed
+            self.flip = True
 
         elif self.moving_right:
-            self.velocity.x = self.speed            
+            self.velocity.x = self.speed
+            self.flip = False         
 
     def check_collision_with_tile(self, dir):
         if dir == 'x':
@@ -91,7 +94,7 @@ class Player(pygame.sprite.Sprite):
     
     #Player's rendering related methods
     def draw(self, display):
-        display.blit(self.image,(self.rect.x, self.rect.y))
+        display.blit(pygame.transform.flip(self.image,self.flip,False), (self.rect.x, self.rect.y))
         pygame.draw.rect(display, (255,0,0), self.rect, 1)
         
 
