@@ -42,7 +42,7 @@ class Game():
             self.events()
             self.update()
             self.draw()
-            self.clock.tick(600)
+            self.clock.tick(60)
 
     def events(self):
         #Game Loop: - Events

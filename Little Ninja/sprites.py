@@ -52,15 +52,18 @@ class Player(pygame.sprite.Sprite):
     
     #Checks for player input and sets velocity in the x axis accordingly(SE)
     def get_input(self):
-        self.velocity.x, self.velocity.y = 0, 0 
+        #self.velocity.x = 0 
 
         if self.moving_left:
             self.velocity.x = -self.speed
             self.flip = True
+        
 
         elif self.moving_right:
             self.velocity.x = self.speed
-            self.flip = False         
+            self.flip = False   
+        else:
+            self.velocity.x = 0      
 
     def check_collision_with_tile(self, dir):
         if dir == 'x':
@@ -77,20 +80,22 @@ class Player(pygame.sprite.Sprite):
             if hits:
                 if self.velocity.y > 0:#Moving down when collided
                     self.y = hits[0].rect.top - self.rect.height
+                    if (self.rect.centery - hits[0].rect.centery) > 0:
+                        self.velocity.y = 0
                 if self.velocity.y < 0:#Moving up when collided
                     self.y = hits[0].rect.bottom
-                self.velocity.y = 0
-                self.y_current_value = 0
+                    if (self.rect.centery - hits[0].rect.centery) < 0:
+                        self.velocity.y = 0
                 self.rect.y = self.y 
     
     def jump(self):
-            self.y_current_value = self.jump_intensity
+            self.velocity.y = self.jump_intensity
 
     def apply_gravity(self):
-        self.y_current_value += self.gravity * self.game.dt
-        if self.y_current_value > 1500:
-            self.y_current_value = 1500
-        self.velocity.y += self.y_current_value
+        self.velocity.y += self.gravity * self.game.dt
+        if self.velocity.y > 1500:
+            self.velocity.y = 1500
+
     
     #Player's rendering related methods
     def draw(self, display):
