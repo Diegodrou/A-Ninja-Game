@@ -84,8 +84,7 @@ class Player(pygame.sprite.Sprite):
                         self.velocity.y = 0
                 if self.velocity.y < 0:#Moving up when collided
                     self.y = hits[0].rect.bottom
-                    if (self.rect.centery - hits[0].rect.centery) < 0:
-                        self.velocity.y = 0
+                self.velocity.y = 0
                 self.rect.y = self.y 
     
     def jump(self):
