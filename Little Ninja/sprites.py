@@ -21,7 +21,6 @@ class Player(pygame.sprite.Sprite):
         
         #Player Movement attributes
         self.velocity  = pygame.math.Vector2(0,0) 
-        self.y_current_value = 0
         self.speed = 215
         self.moving_right = False
         self.moving_left = False
@@ -29,12 +28,13 @@ class Player(pygame.sprite.Sprite):
         self.jumping = False
         self.gravity = 830
         self.air_timer = 0
+        self.on_ground = False
 
         self.x = spawn_pos[0] * TILE_SIZE
         self.y = spawn_pos[1] * TILE_SIZE
 
 
-    #Player's logic related methods(SE)
+    #Updates player logic every frame(SE)
     def update(self):
         self.get_input()
         self.apply_gravity()
@@ -52,20 +52,19 @@ class Player(pygame.sprite.Sprite):
     
     #Checks for player input and sets velocity in the x axis accordingly(SE)
     def get_input(self):
-        #self.velocity.x = 0 
-
         if self.moving_left:
             self.velocity.x = -self.speed
             self.flip = True
-        
 
         elif self.moving_right:
             self.velocity.x = self.speed
             self.flip = False   
         else:
             self.velocity.x = 0      
-
-    def check_collision_with_tile(self, dir):
+    
+    #Checks for collisions in the  y or x direction and positions the player accordingly(SE)
+    #->param dir should only be 'y' or 'x'
+    def check_collision_with_tile(self, dir:str):
         if dir == 'x':
             hits = pygame.sprite.spritecollide(self,self.game.all_tiles,False)
             if hits:
@@ -80,15 +79,34 @@ class Player(pygame.sprite.Sprite):
             if hits:
                 if self.velocity.y > 0:#Moving down when collided
                     self.y = hits[0].rect.top - self.rect.height
-                    if (self.rect.centery - hits[0].rect.centery) > 0:
-                        self.velocity.y = 0
+                    self.on_ground = True # on ground <--> colliding on the y axis & velocity.y > 0
                 if self.velocity.y < 0:#Moving up when collided
                     self.y = hits[0].rect.bottom
                 self.velocity.y = 0
-                self.rect.y = self.y 
+                self.rect.y = self.y
+
+            self.check_not_on_ground()
+            self.coyote_time()
+
+    #Checks if the player is no longer on the ground(SE)
+    #ply not on ground <-->  14.8 < velocity.y or velocity.y < 0 (because of velocity bug)
+    def check_not_on_ground(self):
+        if self.velocity.y > 27 or self.velocity.y < 0: #14.7 --> 60fps|| 27 --> unlocked fps
+            self.on_ground = False
+            #print(self.velocity.y)
     
+    #Makes the player jump(SE)
     def jump(self):
             self.velocity.y = self.jump_intensity
+    
+    #Coyote time(SE)
+    #A brief delay between an pressing the jump button and
+    #the consequences of that action that has no physical cause and only exist for gameplay purposes
+    def coyote_time(self):
+        if self.on_ground:
+            self.air_timer = 0
+        else:
+            self.air_timer += 1 * self.game.dt
 
     def apply_gravity(self):
         self.velocity.y += self.gravity * self.game.dt

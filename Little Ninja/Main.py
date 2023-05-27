@@ -58,7 +58,7 @@ class Game():
                 if event.key == pygame.K_LEFT:
                         self.player.moving_left = True
                 if event.key in [K_SPACE, K_UP]:
-                    if self.player.air_timer < 7:
+                    if self.player.air_timer < 0.12:
                         self.player.jump()
 
             if event.type == pygame.KEYUP:
@@ -157,7 +157,8 @@ class Game():
         self.window.blit(self.show_playerMoveVector(),(10,30))
         self.window.blit(self.show_DeltaTime(),(10,50))
         self.window.blit(self.show_player_pos(),(10,70))
-        self.window.blit(self.show_Y_current(),(10,100))
+        self.window.blit(self.show_player_on_ground(),(10,100))
+        self.window.blit(self.show_player_air_timer(),(10,130))
 
     def update_fps(self):
         font = pygame.font.SysFont("Arial",18)
@@ -184,12 +185,17 @@ class Game():
        deltaTime_txt = font.render(deltaTime, 1, pygame.Color("coral"))
        return deltaTime_txt
     
-
-    def show_Y_current(self):
+    def show_player_on_ground(self):
        font = pygame.font.SysFont("Arial", 18) 
-       Y_c = "Y_c: " + str(self.player.y_current_value)
-       Y_c_txt = font.render(Y_c, 1, pygame.Color("coral"))
-       return Y_c_txt
+       on_grnd = "on_ground: " + str(self.player.on_ground)
+       on_grnd_txt = font.render(on_grnd, 1, pygame.Color("coral"))
+       return on_grnd_txt
+    
+    def show_player_air_timer(self):
+       font = pygame.font.SysFont("Arial", 18) 
+       p_air_timer = "air_timer:  " + str(self.player.air_timer)
+       p_air_timer_txt = font.render(p_air_timer, 1, pygame.Color("coral"))
+       return p_air_timer_txt
     #Loading functions
 
     #loads menu background /game background / botones/ tile image assets
