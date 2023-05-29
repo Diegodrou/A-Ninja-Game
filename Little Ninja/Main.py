@@ -58,8 +58,9 @@ class Game():
                 if event.key == pygame.K_LEFT:
                         self.player.moving_left = True
                 if event.key in [K_SPACE, K_UP]:
-                    if self.player.air_timer < 0.12:
-                        self.player.jump()
+                        self.player.jumping = True
+                        self.player.jump(self.player.canJump())
+                        
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_RIGHT:
@@ -159,6 +160,8 @@ class Game():
         self.window.blit(self.show_player_pos(),(10,70))
         self.window.blit(self.show_player_on_ground(),(10,100))
         self.window.blit(self.show_player_air_timer(),(10,130))
+        self.window.blit(self.show_player_jumping_b(),(10,160))
+        self.window.blit(self.show_player_jumping_b_timer(),(10,190))
 
     def update_fps(self):
         font = pygame.font.SysFont("Arial",18)
@@ -196,6 +199,20 @@ class Game():
        p_air_timer = "air_timer:  " + str(self.player.air_timer)
        p_air_timer_txt = font.render(p_air_timer, 1, pygame.Color("coral"))
        return p_air_timer_txt
+    
+    def show_player_jumping_b(self):
+       font = pygame.font.SysFont("Arial", 18) 
+       jumping_b = "jumping:  " + str(self.player.jumping)
+       jumping_b_txt = font.render(jumping_b, 1, pygame.Color("coral"))
+       return jumping_b_txt
+    
+    def show_player_jumping_b_timer(self):
+       font = pygame.font.SysFont("Arial", 18) 
+       jumping_b_timer = "jump_buffer_timer:  " + str(self.player.jump_buffer_timer)
+       jumping_b_timer_txt = font.render(jumping_b_timer, 1, pygame.Color("coral"))
+       return jumping_b_timer_txt
+    
+
     #Loading functions
 
     #loads menu background /game background / botones/ tile image assets
