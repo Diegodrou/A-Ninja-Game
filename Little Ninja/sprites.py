@@ -30,6 +30,9 @@ class Player(pygame.sprite.Sprite):
         self.air_timer = 0
         self.on_ground = False
         self.jump_buffer_timer = 0
+        self.jump_q = 0
+        self.JUMP_BUFFER_TRESHOLD = 0.6
+        self.COYOTE_TIME_TRESHOLD = 0.11
 
         self.x = spawn_pos[0] * TILE_SIZE
         self.y = spawn_pos[1] * TILE_SIZE
@@ -37,10 +40,10 @@ class Player(pygame.sprite.Sprite):
 
     #Updates player logic every frame(SE)
     def update(self):
+        #self.JumpQueue()
         self.get_input()
         self.apply_gravity()
-        if self.velocity.y > 0 and self.jumping:
-            self.jumping = False
+        self.check_no_longer_jumping()
         self.move()
         self.coyote_time()
         self.jump_buffer()
@@ -109,11 +112,13 @@ class Player(pygame.sprite.Sprite):
     #Coyote time(SE)
     #A brief delay between an pressing the jump button and
     #the consequences of that action that has no physical cause and only exist for gameplay purposes
+    #This function updates the air_timer
     def coyote_time(self):
         if self.on_ground:
             self.air_timer = 0
         else:
             self.air_timer += 1 * self.game.dt
+    
     #jumpBuffer(SE)
     #This function updates the jumpBuffer timer
     def jump_buffer(self):
@@ -124,23 +129,37 @@ class Player(pygame.sprite.Sprite):
     
     #Checks if the air timer surpassed the coyote time treshold
     def check_coyote_time(self):
-        if self.air_timer < 0.12:
+        if self.air_timer < self.COYOTE_TIME_TRESHOLD:
             return True
         return False
     
     #Checks if the jumpBuffer timer surpassed the jumpBuffer threshold
     def check_jump_buffer(self):
-        if self.jump_buffer_timer < 0.4:
+        if self.jump_buffer_timer < self.JUMP_BUFFER_TRESHOLD:
             return True
         return False
     
+    #Checks if the the player is no longer jumping and if so sets the jumping variable to false (SE)
+    def check_no_longer_jumping(self):
+        if self.velocity.y > 0 and self.jumping:
+            self.jumping = False
+
     #Checks the different conditions in which a player should be allowed to jump
     # -->returns True if the player can jump , False if he can't jump
     def canJump(self):
-        if self.on_ground or self.check_jump_buffer() or self.check_coyote_time():
+        if self.on_ground  or self.check_coyote_time():
             return True
-        return False           
-
+        return False
+    
+    def JumpQueue(self):
+        if self.check_jump_buffer():
+            self.jump_q += 1
+        if self.jump_q >= 1 and self.on_ground:
+            self.jumping = True
+            self.jump(True)
+            self.jump_q = 0 
+    
+    #Apply's gravity to the player(SE)
     def apply_gravity(self):
         self.velocity.y += self.gravity * self.game.dt
         if self.velocity.y > 1500:
@@ -150,9 +169,9 @@ class Player(pygame.sprite.Sprite):
     #Player's rendering related methods
     def draw(self, display):
         display.blit(pygame.transform.flip(self.image,self.flip,False), (self.rect.x, self.rect.y))
-        pygame.draw.rect(display, (255,0,0), self.rect, 1)
+        if self.game.debug_on:
+            pygame.draw.rect(display, (255,0,0), self.rect, 1)
         
-
     
     def find_blit_coordinates(self):
             middle_of_current_surface = (self.image.get_width())/2

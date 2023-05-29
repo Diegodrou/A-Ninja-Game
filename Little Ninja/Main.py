@@ -9,13 +9,12 @@ class Game():
     def __init__(self):
         #initialise pygame(window,mixer,clock,etc)
         self.running = True
-
         pygame.init()
         pygame.display.set_caption(TITLE)
         self.window = pygame.display.set_mode((window_width, window_height))
         self.display = pygame.Surface(DISPLAY_SIZE)
         self.clock = pygame.time.Clock()
-        self.debug_on = True
+        self.debug_on = False
         self.ASSETS = {}
         self.load_assets()
         self.LEVELS = self.load_levels()
@@ -60,8 +59,9 @@ class Game():
                 if event.key in [K_SPACE, K_UP]:
                         self.player.jumping = True
                         self.player.jump(self.player.canJump())
+                if event.key == pygame.K_BACKSLASH:
+                        self.debug_on = not self.debug_on
                         
-
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_RIGHT:
                     self.player.moving_right = False
