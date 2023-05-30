@@ -57,8 +57,11 @@ class Game():
                 if event.key == pygame.K_LEFT:
                         self.player.moving_left = True
                 if event.key in [K_SPACE, K_UP]:
+                        self.player.Jkey_pressed = True
                         self.player.jumping = True
                         self.player.jump(self.player.canJump())
+                    
+
                 if event.key == pygame.K_BACKSLASH:
                         self.debug_on = not self.debug_on
                         
@@ -67,6 +70,8 @@ class Game():
                     self.player.moving_right = False
                 if event.key == pygame.K_LEFT:
                     self.player.moving_left = False
+                if event.key in [K_SPACE, K_UP]:
+                    self.player.Jkey_pressed = False
                 
     
     #updates all the game's logic
@@ -162,6 +167,7 @@ class Game():
         self.window.blit(self.show_player_air_timer(),(10,130))
         self.window.blit(self.show_player_jumping_b(),(10,160))
         self.window.blit(self.show_player_jumping_b_timer(),(10,190))
+        self.window.blit(self.show_player_Jkey_pressed(),(10,220))
 
     def update_fps(self):
         font = pygame.font.SysFont("Arial",18)
@@ -211,6 +217,12 @@ class Game():
        jumping_b_timer = "jump_buffer_timer:  " + str(self.player.jump_buffer_timer)
        jumping_b_timer_txt = font.render(jumping_b_timer, 1, pygame.Color("coral"))
        return jumping_b_timer_txt
+    
+    def show_player_Jkey_pressed(self):
+       font = pygame.font.SysFont("Arial", 18) 
+       Jkey_pressed = "jKeyPressed:  " + str(self.player.Jkey_pressed)
+       Jkey_pressed_txt = font.render(Jkey_pressed, 1, pygame.Color("coral"))
+       return Jkey_pressed_txt
     
 
     #Loading functions

@@ -30,7 +30,8 @@ class Player(pygame.sprite.Sprite):
         self.air_timer = 0
         self.on_ground = False
         self.jump_buffer_timer = 0
-        self.jump_q = 0
+        self.jump_q = False
+        self.Jkey_pressed = False
         self.JUMP_BUFFER_TRESHOLD = 0.6
         self.COYOTE_TIME_TRESHOLD = 0.11
 
@@ -40,7 +41,7 @@ class Player(pygame.sprite.Sprite):
 
     #Updates player logic every frame(SE)
     def update(self):
-        #self.JumpQueue()
+        self.JumpQueue()
         self.get_input()
         self.apply_gravity()
         self.check_no_longer_jumping()
@@ -135,7 +136,7 @@ class Player(pygame.sprite.Sprite):
     
     #Checks if the jumpBuffer timer surpassed the jumpBuffer threshold
     def check_jump_buffer(self):
-        if self.jump_buffer_timer < self.JUMP_BUFFER_TRESHOLD:
+        if self.Jkey_pressed and (self.jump_buffer_timer < self.JUMP_BUFFER_TRESHOLD):
             return True
         return False
     
@@ -151,13 +152,13 @@ class Player(pygame.sprite.Sprite):
             return True
         return False
     
+    #If there's a jump in the queue and the player is on the ground a jump will be performed 
     def JumpQueue(self):
-        if self.check_jump_buffer():
-            self.jump_q += 1
-        if self.jump_q >= 1 and self.on_ground:
+        self.jump_q = self.check_jump_buffer()
+        if self.jump_q  and self.on_ground:
             self.jumping = True
             self.jump(True)
-            self.jump_q = 0 
+            self.jump_q = False 
     
     #Apply's gravity to the player(SE)
     def apply_gravity(self):
