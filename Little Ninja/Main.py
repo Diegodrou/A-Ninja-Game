@@ -41,7 +41,7 @@ class Game():
             self.events()
             self.update()
             self.draw()
-            self.clock.tick(60)
+            self.clock.tick(600)
 
     def events(self):
         #Game Loop: - Events
@@ -58,7 +58,6 @@ class Game():
                         self.player.moving_left = True
                 if event.key in [K_SPACE, K_UP]:
                         self.player.Jkey_pressed = True
-                        self.player.jumping = True
                         self.player.jump(self.player.canJump())
                     
 
@@ -168,6 +167,7 @@ class Game():
         self.window.blit(self.show_player_jumping_b(),(10,160))
         self.window.blit(self.show_player_jumping_b_timer(),(10,190))
         self.window.blit(self.show_player_Jkey_pressed(),(10,220))
+        self.window.blit(self.show_player_anim_index(),(10,250))
 
     def update_fps(self):
         font = pygame.font.SysFont("Arial",18)
@@ -223,6 +223,12 @@ class Game():
        Jkey_pressed = "jKeyPressed:  " + str(self.player.Jkey_pressed)
        Jkey_pressed_txt = font.render(Jkey_pressed, 1, pygame.Color("coral"))
        return Jkey_pressed_txt
+    
+    def show_player_anim_index(self):
+       font = pygame.font.SysFont("Arial", 18) 
+       anim_index = "anim_index: " + str(self.player.index)
+       anim_index_txt = font.render(anim_index, 1, pygame.Color("coral"))
+       return anim_index_txt
     
 
     #Loading functions

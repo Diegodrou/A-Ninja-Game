@@ -18,6 +18,8 @@ class Player(pygame.sprite.Sprite):
         self.flip = False
         self.width = self.image.get_width()
         self.height = self.image.get_height()
+        self.PLAYER_ANIMATION_COOLDOWN = 125
+        self.update_time = pygame.time.get_ticks()
         
         #Player Movement attributes
         self.velocity  = pygame.math.Vector2(0,0) 
@@ -35,19 +37,23 @@ class Player(pygame.sprite.Sprite):
         self.JUMP_BUFFER_TRESHOLD = 0.6
         self.COYOTE_TIME_TRESHOLD = 0.11
 
+        # Other player attributes
+        self.dead = False
+
         self.x = spawn_pos[0] * TILE_SIZE
         self.y = spawn_pos[1] * TILE_SIZE
 
 
     #Updates player logic every frame(SE)
     def update(self):
-        self.JumpQueue()
+        self.Jump_Queue()
         self.get_input()
         self.apply_gravity()
         self.check_no_longer_jumping()
         self.move()
         self.coyote_time()
         self.jump_buffer()
+        self.update_animation()
         
         
     #Moves the player to the coordinates  the velocity vector points at(SE)
@@ -107,6 +113,7 @@ class Player(pygame.sprite.Sprite):
     
     #Makes the player jump(SE)
     def jump(self,jump):
+        self.jumping = True
         if jump: 
             self.velocity.y = self.jump_intensity
     
@@ -152,11 +159,10 @@ class Player(pygame.sprite.Sprite):
             return True
         return False
     
-    #If there's a jump in the queue and the player is on the ground a jump will be performed 
-    def JumpQueue(self):
+    #If there's a jump in the Jump queue and the player is on the ground a jump will be performed (SE)
+    def Jump_Queue(self):
         self.jump_q = self.check_jump_buffer()
         if self.jump_q  and self.on_ground:
-            self.jumping = True
             self.jump(True)
             self.jump_q = False 
     
@@ -166,10 +172,48 @@ class Player(pygame.sprite.Sprite):
         if self.velocity.y > 1500:
             self.velocity.y = 1500
 
-    
+    #Handles animation logic (SE)
+    #Changing animation frame & reseting animation when it's done 
+    # & changing the  animation depending on the action
+    def update_animation(self):
+        
+        # update img depending on current frame
+        self.image = self.animation_list[self.action][self.index]
+
+        # check if enough time has passed since the last update
+        if pygame.time.get_ticks() - self.update_time > self.PLAYER_ANIMATION_COOLDOWN:
+            self.update_time = pygame.time.get_ticks()
+            self.index += 1
+
+            # if the animation has run out , reset back to the start
+            if self.index >= len(self.animation_list[self.action]):
+                self.index = 0
+
+        #Changes action
+        if not self.dead:
+            if self.velocity.y < 0:
+                self.update_action(2)  # 2:Jump
+
+            elif self.moving_right or self.moving_left:
+                self.update_action(1)  # 1:run
+
+            else:
+                self.update_action(0)  # 0:idle
+
+    #Changes player's current action to the next action
+    def update_action(self, new_action):
+
+        # check if new action is different to the previous
+        if new_action != self.action:
+            self.action = new_action
+            # update the anim settings
+            self.index = 0
+            self.update_time = self.game.dt
+
     #Player's rendering related methods
     def draw(self, display):
-        display.blit(pygame.transform.flip(self.image,self.flip,False), (self.rect.x, self.rect.y))
+        player_render_xy = self.find_blit_coordinates()
+        display.blit(pygame.transform.flip(self.image,self.flip,False), player_render_xy)
         if self.game.debug_on:
             pygame.draw.rect(display, (255,0,0), self.rect, 1)
         
