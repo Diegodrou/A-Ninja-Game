@@ -201,7 +201,7 @@ class Player(pygame.sprite.Sprite):
                 self.update_action(0)  # 0:idle
 
     #Changes player's current action to the next action
-    def update_action(self, new_action):
+    def update_action(self, new_action:int):
 
         # check if new action is different to the previous
         if new_action != self.action:
@@ -211,7 +211,7 @@ class Player(pygame.sprite.Sprite):
             self.update_time = self.game.dt
 
     #Player's rendering related methods
-    def draw(self, display):
+    def draw(self, display:pygame.Surface):
         player_render_xy = self.find_blit_coordinates()
         display.blit(pygame.transform.flip(self.image,self.flip,False), player_render_xy)
         if self.game.debug_on:
