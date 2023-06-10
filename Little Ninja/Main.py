@@ -4,6 +4,7 @@ from settings import *
 from sprites import *
 from boton import Boton
 from map import Map
+from camera import Camera
 
 class Game():
     def __init__(self):
@@ -24,6 +25,7 @@ class Game():
         self.all_sprites = pygame.sprite.Group()
         self.all_tiles = pygame.sprite.Group()
         map = Map(self.LEVELS[level])
+        self.camera = Camera(window_width, window_height, map, self, DISPLAY_SIZE)
         self.setup_level(map.data)
         
 
@@ -41,7 +43,7 @@ class Game():
             self.events()
             self.update()
             self.draw()
-            self.clock.tick(600)
+            self.clock.tick(60)
 
     def events(self):
         #Game Loop: - Events
@@ -78,6 +80,11 @@ class Game():
         #Game Loop: - Update
         for sprite in self.all_sprites:
             sprite.update()
+
+        self.camera.update(self.player)
+        
+        #for tiles in self.all_tiles:
+        #    self.camera.apply_scroll(tiles)
     
     #Renders everything 
     def draw(self):
@@ -158,6 +165,7 @@ class Game():
         pass
     #Debug functions
     def debug(self):
+        self.camera.show_thresholds(self.window)
         self.window.blit(self.update_fps(),(10,10))
         self.window.blit(self.show_playerMoveVector(),(10,30))
         self.window.blit(self.show_DeltaTime(),(10,50))
@@ -168,6 +176,9 @@ class Game():
         self.window.blit(self.show_player_jumping_b_timer(),(10,190))
         self.window.blit(self.show_player_Jkey_pressed(),(10,220))
         self.window.blit(self.show_player_anim_index(),(10,250))
+        self.window.blit(self.show_camera_pos(),(10,280))
+        self.window.blit(self.show_tresholds_pos(),(10,310))
+        
 
     def update_fps(self):
         font = pygame.font.SysFont("Arial",18)
@@ -183,7 +194,7 @@ class Game():
     
     def show_player_pos(self):
         font = pygame.font.SysFont("Arial", 18)
-        xy = "x: " + str(self.player.rect.x) + " y: " + str(self.player.rect.y) 
+        xy = "player: x: " + str(self.player.rect.x) + " y: " + str(self.player.rect.y) 
         xy_text = font.render(xy,1,pygame.Color("coral"))
         return xy_text
 
@@ -230,6 +241,19 @@ class Game():
        anim_index_txt = font.render(anim_index, 1, pygame.Color("coral"))
        return anim_index_txt
     
+    def show_camera_pos(self):
+       font = pygame.font.SysFont("Arial", 18) 
+       camera_pos = "camera : x: " + str(self.camera.frame.x) + " y: " + str(self.camera.frame.y)
+       camera_pos_txt = font.render(camera_pos, 1, pygame.Color("coral"))
+       return camera_pos_txt
+    
+    def show_tresholds_pos(self):
+       font = pygame.font.SysFont("Arial", 18) 
+       tresholds_pos = "A: " + str(self.camera.treshold_A) + " B: " + str(self.camera.treshold_B)
+       tresholds_pos_txt = font.render(tresholds_pos, 1, pygame.Color("coral"))
+       return tresholds_pos_txt
+        
+
 
     #Loading functions
 
@@ -286,6 +310,8 @@ class Game():
                     Tile(self, self.ASSETS["TILES"][0], (col,row))
                 if tile == 1:
                     self.player = Player(self,(col, row ))
+                    print(col)
+                    print(row)
                 if tile == 2:
                     pass
 
