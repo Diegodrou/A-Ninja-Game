@@ -79,7 +79,7 @@ class Game():
     def update(self):
         #Game Loop: - Update
         for sprite in self.all_sprites:
-            sprite.update()
+            sprite.update(self.camera.window_px_to_display_px(self.camera.treshold_A),self.camera.window_px_to_display_px(self.camera.treshold_B))
 
         self.camera.update(self.player)
         
@@ -310,8 +310,6 @@ class Game():
                     Tile(self, self.ASSETS["TILES"][0], (col,row))
                 if tile == 1:
                     self.player = Player(self,(col, row ))
-                    print(col)
-                    print(row)
                 if tile == 2:
                     pass
 

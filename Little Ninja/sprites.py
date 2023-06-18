@@ -45,11 +45,12 @@ class Player(pygame.sprite.Sprite):
 
 
     #Updates player logic every frame(SE)
-    def update(self):
+    def update(self,treshold_A, treshold_B):
         self.Jump_Queue()
         self.get_input()
         self.apply_gravity()
         self.check_no_longer_jumping()
+        self.stop_player_motion(treshold_A,treshold_B)
         self.move()
         self.coyote_time()
         self.jump_buffer()
@@ -171,6 +172,14 @@ class Player(pygame.sprite.Sprite):
         self.velocity.y += self.gravity * self.game.dt
         if self.velocity.y > 1500:
             self.velocity.y = 1500
+    
+    #Sets player x velocity to 0 if the left of the player rect is on treshold_A or
+    #If the right of the player rect is on treshold_B(SE)
+    def stop_player_motion(self, treshold_A:int, treshold_B:int):
+        if self.rect.left <= treshold_A and self.velocity.x < 0:
+            self.velocity.x = 0
+        if self.rect.right >= treshold_B and self.velocity.x > 0:
+            self.velocity.x = 0
 
     #Handles animation logic (SE)
     #Changing animation frame & reseting animation when it's done 

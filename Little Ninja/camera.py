@@ -58,12 +58,10 @@ class Camera:
         out_Of_Map = self.out_of_map()
         if self.check_if_on_treshold_A(target) :
             self.frame.x -= self.CAMERA_SCROLL 
-            print("here")
 
             
         if self.check_if_on_treshold_B(target):
             self.frame.x += self.CAMERA_SCROLL
-            print("here2")
     
     #Converts display pixel x coordinate to window pixel x coordinates
     #-> param n an interger
@@ -71,6 +69,13 @@ class Camera:
     def display_px_to_window_px(self,n:int):
         coef = self.WINDOW_SIZE[0] / self.DISPLAY_SIZE[0]
         return int(n * coef)
+    
+    #Converts window pixel x coordinate to display pixel x coordinates
+    #-> param n an interger
+    #-> return an interger
+    def window_px_to_display_px(self, n:int):
+        coef = self.WINDOW_SIZE[0] / self.DISPLAY_SIZE[0]
+        return int(n / coef)
 
     def show_thresholds(self,window):
         pygame.draw.line(window,"YELLOW",(self.treshold_A,0),(self.treshold_A,416))
