@@ -75,17 +75,19 @@ class Game():
                     self.player.Jkey_pressed = False
                 
     
-    #updates all the game's logic
+    #updates all the game's logic(SE)
     def update(self):
         #Game Loop: - Update
-        for sprite in self.all_sprites:
-            sprite.update(self.camera.window_px_to_display_px(self.camera.treshold_A),self.camera.window_px_to_display_px(self.camera.treshold_B))
-
+        self.update_sprites()
         self.camera.update(self.player)
         
-        for tiles in self.all_tiles:
-            tiles.rect.x += self.camera.scroll_amount
-    
+    #Updates all the sprites logic(SE)
+    def update_sprites(self):
+        for sprite in self.all_sprites:
+            sprite.update(self.camera.window_px_to_display_px(self.camera.treshold_A),
+                          self.camera.window_px_to_display_px(self.camera.treshold_B))
+        
+
     #Renders everything 
     def draw(self):
         #Game Loop: - Draw

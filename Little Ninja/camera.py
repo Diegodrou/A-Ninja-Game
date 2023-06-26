@@ -11,18 +11,21 @@ class Camera:
         self.DISPLAY_SIZE = display_size
         self.WINDOW_SIZE = (width,height)
         self.MAP = map
-        self.treshold_gap = 100
-        self.CAMERA_SCROLL = 100
+        self.treshold_gap = 150
+        self.CAMERA_SCROLL = 215
         self.treshold_A = self.treshold_gap
         self.treshold_B = width - self.treshold_gap
         self.scroll_amount = 0
-
-    def apply_scroll(self, entity):
-        return - (self.frame.x)
+    
+    #Adds the scroll_value to the x cordinate of  every tile of the map(SE)
+    def apply_scroll(self):
+        for tile in self.game.all_tiles:
+            tile.rect.x += self.game.camera.scroll_amount
     
     #Updates the camera logic(SE)
     def update(self, target):
         self.move_camera(target)
+        self.apply_scroll()
     
     #Checks if target has crossed the treshold A and if its running towards the treshold
     #->param target is a player object
