@@ -45,26 +45,26 @@ class Player(pygame.sprite.Sprite):
 
 
     #Updates player logic every frame(SE)
-    def update(self,treshold_A, treshold_B):
+    def update(self,c_treshold_A, c_treshold_B):
         self.Jump_Queue()
         self.get_input()
         self.apply_gravity()
         self.check_no_longer_jumping()
-        self.stop_player_motion(treshold_A,treshold_B)
-        self.move()
+        self.stop_player_motion(c_treshold_A,c_treshold_B)
+        self.move(c_treshold_A, c_treshold_B)
         self.coyote_time()
         self.jump_buffer()
         self.update_animation()
         
         
     #Moves the player to the coordinates  the velocity vector points at(SE)
-    def move(self):
+    def move(self,c_treshold_A, c_treshold_B):
         self.x += self.velocity.x * self.game.dt
         self.y += self.velocity.y * self.game.dt
         self.rect.x =  round(self.x)
-        self.check_collision_with_tile('x')
+        self.check_collision_with_tile('x', c_treshold_A, c_treshold_B)
         self.rect.y = round(self.y)
-        self.check_collision_with_tile('y')
+        self.check_collision_with_tile('y', c_treshold_A, c_treshold_B)
     
     #Checks for player input and sets velocity in the x axis accordingly(SE)
     def get_input(self):
@@ -80,13 +80,17 @@ class Player(pygame.sprite.Sprite):
     
     #Checks for collisions in the  y or x direction and positions the player accordingly(SE)
     #->param dir should only be 'y' or 'x'
-    def check_collision_with_tile(self, dir:str):
+    def check_collision_with_tile(self, dir:str, c_treshold_A, c_treshold_B):
         if dir == 'x':
             hits = pygame.sprite.spritecollide(self,self.game.all_tiles,False)
             if hits:
                 if self.velocity.x > 0:#Moving to the right when collided
                     self.x = hits[0].rect.left - self.rect.width
                 if self.velocity.x < 0:#Moving to the left when collided
+                    self.x = hits[0].rect.right
+                if self.velocity.x == 0 and self.rect.right >= c_treshold_B:#When moving to the right and beyond treshold B
+                    self.x = hits[0].rect.left - self.rect.width 
+                if self.velocity.x == 0 and self.rect.left <= c_treshold_A:#When moving to the left and beyond treshold A
                     self.x = hits[0].rect.right
                 self.velocity.x = 0
                 self.rect.x = self.x 

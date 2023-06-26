@@ -54,7 +54,7 @@ class Camera:
         
         return False
 
-    #Moves camera within the game map
+    #Moves camera within the game map(SE)
     def move_camera(self, target):
         self.scroll_amount = self.CAMERA_SCROLL * self.game.dt
         on_trA = self.check_if_on_treshold_A(target)
