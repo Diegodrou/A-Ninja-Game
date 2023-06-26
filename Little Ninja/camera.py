@@ -12,12 +12,13 @@ class Camera:
         self.WINDOW_SIZE = (width,height)
         self.MAP = map
         self.treshold_gap = 100
-        self.CAMERA_SCROLL = 1
+        self.CAMERA_SCROLL = 100
         self.treshold_A = self.treshold_gap
         self.treshold_B = width - self.treshold_gap
+        self.scroll_amount = 0
 
     def apply_scroll(self, entity):
-        return entity.rect.move(self.frame.topleft)
+        return - (self.frame.x)
     
     #Updates the camera logic(SE)
     def update(self, target):
@@ -28,7 +29,7 @@ class Camera:
     #->returns True if both of those condition are met
     def check_if_on_treshold_A(self,target:Player):
         target_left_pos = self.display_px_to_window_px(target.rect.left)
-        if target_left_pos < self.treshold_A and target.velocity.x < 0:
+        if target_left_pos <= self.treshold_A and target.moving_left:
             return True
         
         return False
@@ -38,7 +39,7 @@ class Camera:
     #->returns True if both of those condition are met
     def check_if_on_treshold_B(self,target:Player):
         target_right_pos = self.display_px_to_window_px(target.rect.right)
-        if target_right_pos > self.treshold_B and target.velocity.x > 0:
+        if target_right_pos >= self.treshold_B and target.moving_right:
             return True
         
         return False
@@ -55,13 +56,19 @@ class Camera:
 
     #Moves camera within the game map
     def move_camera(self, target):
-        out_Of_Map = self.out_of_map()
-        if self.check_if_on_treshold_A(target) :
-            self.frame.x -= self.CAMERA_SCROLL 
+        self.scroll_amount = self.CAMERA_SCROLL * self.game.dt
+        on_trA = self.check_if_on_treshold_A(target)
+        on_trB = self.check_if_on_treshold_B(target)
+        if on_trA :
+            self.frame.x -= self.scroll_amount
 
-            
-        if self.check_if_on_treshold_B(target):
-            self.frame.x += self.CAMERA_SCROLL
+        if on_trB:
+            self.frame.x += self.scroll_amount
+            self.scroll_amount = -(self.scroll_amount)
+        
+        if not on_trA and not on_trB:
+            self.scroll_amount = 0
+        
     
     #Converts display pixel x coordinate to window pixel x coordinates
     #-> param n an interger

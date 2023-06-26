@@ -83,8 +83,8 @@ class Game():
 
         self.camera.update(self.player)
         
-        #for tiles in self.all_tiles:
-        #    self.camera.apply_scroll(tiles)
+        for tiles in self.all_tiles:
+            tiles.rect.x += self.camera.scroll_amount
     
     #Renders everything 
     def draw(self):
@@ -178,6 +178,8 @@ class Game():
         self.window.blit(self.show_player_anim_index(),(10,250))
         self.window.blit(self.show_camera_pos(),(10,280))
         self.window.blit(self.show_tresholds_pos(),(10,310))
+        self.window.blit(self.show_player_left_and_right_pos(),(10,340))
+        self.window.blit(self.show_scroll_amount(),(10,370))
         
 
     def update_fps(self):
@@ -197,7 +199,6 @@ class Game():
         xy = "player: x: " + str(self.player.rect.x) + " y: " + str(self.player.rect.y) 
         xy_text = font.render(xy,1,pygame.Color("coral"))
         return xy_text
-
     
     def show_DeltaTime(self):
        font = pygame.font.SysFont("Arial", 18) 
@@ -252,7 +253,18 @@ class Game():
        tresholds_pos = "A: " + str(self.camera.treshold_A) + " B: " + str(self.camera.treshold_B)
        tresholds_pos_txt = font.render(tresholds_pos, 1, pygame.Color("coral"))
        return tresholds_pos_txt
-        
+    
+    def show_player_left_and_right_pos(self):
+       font = pygame.font.SysFont("Arial", 18) 
+       player_left_and_right = "left: " + str(self.camera.display_px_to_window_px(self.player.rect.left)) + " right: " + str(self.camera.display_px_to_window_px(self.player.rect.right))
+       player_left_and_right_txt = font.render(player_left_and_right, 1, pygame.Color("coral"))
+       return player_left_and_right_txt
+    
+    def show_scroll_amount(self):
+       font = pygame.font.SysFont("Arial", 18) 
+       scroll_amount = "scroll_amount : " + str(self.camera.scroll_amount)
+       scroll_amount_txt = font.render(scroll_amount, 1, pygame.Color("coral"))
+       return scroll_amount_txt
 
 
     #Loading functions
