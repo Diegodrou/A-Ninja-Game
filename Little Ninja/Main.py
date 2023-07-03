@@ -85,7 +85,10 @@ class Game():
     def update_sprites(self):
         for sprite in self.all_sprites:
             sprite.update(self.camera.window_px_to_display_px(self.camera.treshold_A),
-                          self.camera.window_px_to_display_px(self.camera.treshold_B))
+                          self.camera.window_px_to_display_px(self.camera.treshold_B),
+                          self.camera.frame.x,
+                          self.camera.frame.right,
+                          2700)
         
 
     #Renders everything 
@@ -136,7 +139,7 @@ class Game():
 
             #All Updates
             if level_1_b.check_click() :
-                return 0
+                return 1
 
 
 
@@ -246,7 +249,7 @@ class Game():
     
     def show_camera_pos(self):
        font = pygame.font.SysFont("Arial", 18) 
-       camera_pos = "camera : x: " + str(self.camera.frame.x) + " y: " + str(self.camera.frame.y)
+       camera_pos = "camera : x: " + str(self.camera.frame.x) + " y: " + str(self.camera.frame.y) + " right: " + str(self.camera.frame.right)
        camera_pos_txt = font.render(camera_pos, 1, pygame.Color("coral"))
        return camera_pos_txt
     

@@ -45,12 +45,12 @@ class Player(pygame.sprite.Sprite):
 
 
     #Updates player logic every frame(SE)
-    def update(self,c_treshold_A, c_treshold_B):
+    def update(self, c_treshold_A:int, c_treshold_B:int, frame_x:int, frame_right:int, map_pixel_width:int):
         self.Jump_Queue()
         self.get_input()
         self.apply_gravity()
         self.check_no_longer_jumping()
-        self.stop_player_motion(c_treshold_A,c_treshold_B)
+        self.stop_player_motion(c_treshold_A, c_treshold_B, frame_x, frame_right, map_pixel_width)
         self.move(c_treshold_A, c_treshold_B)
         self.coyote_time()
         self.jump_buffer()
@@ -179,11 +179,26 @@ class Player(pygame.sprite.Sprite):
     
     #Sets player x velocity to 0 if the left of the player rect is on treshold_A or
     #If the right of the player rect is on treshold_B(SE)
-    def stop_player_motion(self, treshold_A:int, treshold_B:int):
-        if self.rect.left <= treshold_A and self.velocity.x < 0:
-            self.velocity.x = 0
-        if self.rect.right >= treshold_B and self.velocity.x > 0:
-            self.velocity.x = 0
+    def stop_player_motion(self, treshold_A:int, treshold_B:int, frame_x:int, frame_right:int, map_pixel_width:int):
+        if not self.camera_locked(frame_x, frame_right, map_pixel_width):
+            if self.rect.left <= treshold_A and self.velocity.x < 0:
+                self.velocity.x = 0
+            if self.rect.right >= treshold_B and self.velocity.x > 0:
+                self.velocity.x = 0
+        else:
+            pass
+    
+    
+    #Checks if the camera is locked(not moving)
+    #->param frame_x an interger representing the x position of the camera(topleft corner of the frame)
+    #->param frame_right an interger representing the x position of the righ side of the camera frame
+    #->param map_pixel_width an integer indicating the maps pixel width
+    #->returns true if frame_x is equal to 0 or if the right side of the camera frame is equal to the map
+    #          pixel width else false
+    def camera_locked(self,frame_x:int, frame_right:int, map_pixel_width:int):
+        if frame_x == 0 or frame_right == map_pixel_width:
+            return True
+        return False
 
     #Handles animation logic (SE)
     #Changing animation frame & reseting animation when it's done 

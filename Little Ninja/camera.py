@@ -16,6 +16,9 @@ class Camera:
         self.treshold_A = self.treshold_gap
         self.treshold_B = width - self.treshold_gap
         self.scroll_amount = 0
+        self.locked_A = True #Cause it starts at the right side
+        self.locked_B = False
+        self.locked = self.locked_A or self.locked_B
     
     #Adds the scroll_value to the x cordinate of  every tile of the map(SE)
     def apply_scroll(self):
@@ -24,6 +27,7 @@ class Camera:
     
     #Updates the camera logic(SE)
     def update(self, target):
+        self.set_lock_state()
         self.move_camera(target)
         self.apply_scroll()
     
@@ -57,22 +61,53 @@ class Camera:
         
         return False
 
-    #Moves camera within the game map(SE)
+    #Moves camera within the game map and sets the scroll amount accordingly(SE)
+    #-> param target is the player
     def move_camera(self, target):
-        self.scroll_amount = self.CAMERA_SCROLL * self.game.dt
-        on_trA = self.check_if_on_treshold_A(target)
-        on_trB = self.check_if_on_treshold_B(target)
-        if on_trA :
-            self.frame.x -= self.scroll_amount
-
-        if on_trB:
-            self.frame.x += self.scroll_amount
-            self.scroll_amount = -(self.scroll_amount)
-        
-        if not on_trA and not on_trB:
+        if self.locked:
             self.scroll_amount = 0
+            if self.locked_A:
+                self.frame.x = 0
+                if self.check_if_on_treshold_B(target):
+                    self.scroll_amount = self.CAMERA_SCROLL * self.game.dt
+                    self.frame.x += self.scroll_amount
+            if self.locked_B:
+                self.frame_right = 2700
+                if self.check_if_on_treshold_A(target):
+                    self.scroll_amount = self.CAMERA_SCROLL * self.game.dt
+                    self.frame.x -= self.scroll_amount
+                
+        else:
+            self.scroll_amount = self.CAMERA_SCROLL * self.game.dt
+            on_trA = self.check_if_on_treshold_A(target)
+            on_trB = self.check_if_on_treshold_B(target)
+            if on_trA:
+                self.frame.x -= self.scroll_amount
+
+            if on_trB:
+                self.frame.x += self.scroll_amount
+                self.scroll_amount = -(self.scroll_amount)
         
-    
+            if (not on_trA and not on_trB):
+                self.scroll_amount = 0
+        
+    #Decides if the camera is locked or not(SE)
+    def set_lock_state(self):
+        if self.frame.x <= 0:
+            self.locked_A = True
+            self.locked_B = False
+            self.locked = True
+        elif self.frame.right >= 2700:
+            self.locked_B = True
+            self.locked_A = False
+            self.locked = True
+        else:
+            self.locked_A = False
+            self.locked_B = False
+            self.locked = False
+            
+
+
     #Converts display pixel x coordinate to window pixel x coordinates
     #-> param n an interger
     #-> return an interger

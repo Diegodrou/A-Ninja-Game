@@ -14,4 +14,3 @@ class Map:
 
         self.pixelWidth = self.tileWidth * TILE_SIZE
         self.pixelHeight = self.tileHeight * TILE_SIZE
-                    
