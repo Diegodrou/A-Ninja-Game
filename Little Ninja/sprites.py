@@ -193,10 +193,10 @@ class Player(pygame.sprite.Sprite):
     #->param frame_x an interger representing the x position of the camera(topleft corner of the frame)
     #->param frame_right an interger representing the x position of the righ side of the camera frame
     #->param map_pixel_width an integer indicating the maps pixel width
-    #->returns true if frame_x is equal to 0 or if the right side of the camera frame is equal to the map
+    #->returns true if frame_x is equal or inferior to 0 or if the right side of the camera frame is equal or superior to the map
     #          pixel width else false
     def camera_locked(self,frame_x:int, frame_right:int, map_pixel_width:int):
-        if frame_x == 0 or frame_right == map_pixel_width:
+        if frame_x <= 0 or frame_right >= map_pixel_width:
             return True
         return False
 

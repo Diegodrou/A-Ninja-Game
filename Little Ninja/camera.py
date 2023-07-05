@@ -71,6 +71,7 @@ class Camera:
                 if self.check_if_on_treshold_B(target):
                     self.scroll_amount = self.CAMERA_SCROLL * self.game.dt
                     self.frame.x += self.scroll_amount
+                    self.scroll_amount = -(self.scroll_amount)
             if self.locked_B:
                 self.frame_right = 2700
                 if self.check_if_on_treshold_A(target):
