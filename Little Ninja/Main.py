@@ -19,21 +19,20 @@ class Game():
         self.ASSETS = {}
         self.load_assets()
         self.LEVELS = self.load_levels()
-
+    
+    #Start a new game(SE)
     def new_game(self,level:int):
-        #Start a new game
         self.all_sprites = pygame.sprite.Group()
         self.all_tiles = pygame.sprite.Group()
         map = Map(self.LEVELS[level])
         self.camera = Camera(window_width, window_height, map, self, DISPLAY_SIZE)
-        self.setup_level(map.data)
+        self.setup_level(map.data,map.pixelWidth)
         
 
         self.run()
-
+    
+    #Game Loop
     def run(self):
-        
-        #Game Loop
         self.playing = True
         self.prev_time = self.get_time()
         while self.playing:
@@ -44,9 +43,9 @@ class Game():
             self.update()
             self.draw()
             self.clock.tick(60)
-
+    
+    #Game Loop: - Events(SE)
     def events(self):
-        #Game Loop: - Events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 if self.playing:
@@ -84,14 +83,10 @@ class Game():
     #Updates all the sprites logic(SE)
     def update_sprites(self):
         for sprite in self.all_sprites:
-            sprite.update(self.camera.window_px_to_display_px(self.camera.treshold_A),
-                          self.camera.window_px_to_display_px(self.camera.treshold_B),
-                          self.camera.frame.x,
-                          self.camera.frame.right,
-                          2700)
+            sprite.update(self.camera.frame.x, self.camera.frame.right)
         
 
-    #Renders everything 
+    #Renders everything(SE) 
     def draw(self):
         #Game Loop: - Draw
         
@@ -201,7 +196,7 @@ class Game():
     
     def show_player_pos(self):
         font = pygame.font.SysFont("Arial", 18)
-        xy = "player: x: " + str(self.player.rect.x) + " y: " + str(self.player.rect.y) 
+        xy = "Display: player: x: " + str(self.player.rect.x) + " y: " + str(self.player.rect.y) + " right: "+ str(self.player.rect.right) 
         xy_text = font.render(xy,1,pygame.Color("coral"))
         return xy_text
     
@@ -261,7 +256,7 @@ class Game():
     
     def show_player_left_and_right_pos(self):
        font = pygame.font.SysFont("Arial", 18) 
-       player_left_and_right = "left: " + str(self.camera.display_px_to_window_px(self.player.rect.left)) + " right: " + str(self.camera.display_px_to_window_px(self.player.rect.right))
+       player_left_and_right = "Window pos:player: left: " + str(self.camera.display_px_to_window_px(self.player.rect.left)) + " right: " + str(self.camera.display_px_to_window_px(self.player.rect.right))
        player_left_and_right_txt = font.render(player_left_and_right, 1, pygame.Color("coral"))
        return player_left_and_right_txt
     
@@ -320,13 +315,15 @@ class Game():
         
         return lvls
 
-    def setup_level(self,map_layout):
+    def setup_level(self,map_layout,map_width):
         for row,tiles in enumerate(map_layout):
             for col, tile in enumerate(tiles):
                 if tile == 0:
                     Tile(self, self.ASSETS["TILES"][0], (col,row))
                 if tile == 1:
-                    self.player = Player(self,(col, row ))
+                    self.player = Player(self,(col, row ), map_width, 
+                                         self.camera.window_px_to_display_px(self.camera.treshold_A), 
+                                         self.camera.window_px_to_display_px(self.camera.treshold_B))
                 if tile == 2:
                     pass
 

@@ -3,7 +3,7 @@ import os
 from settings import *
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, game_attritues, spawn_pos:tuple):
+    def __init__(self, game_attritues, spawn_pos:tuple, map_width:int, TRH_A:int, TRH_B:int):
         self.groups = game_attritues.all_sprites
         #The class constructor (__init__ method) takes an argument of a Group (or list of Groups) the Sprite instance should belong to. 
         pygame.sprite.Sprite.__init__(self,self.groups)
@@ -36,8 +36,12 @@ class Player(pygame.sprite.Sprite):
         self.Jkey_pressed = False
         self.JUMP_BUFFER_TRESHOLD = 0.6
         self.COYOTE_TIME_TRESHOLD = 0.11
+        self.TRESHOLD_A = TRH_A
+        self.TRESHOLD_B = TRH_B
+
 
         # Other player attributes
+        self.map_width = map_width
         self.dead = False
 
         self.x = spawn_pos[0] * TILE_SIZE
@@ -45,26 +49,26 @@ class Player(pygame.sprite.Sprite):
 
 
     #Updates player logic every frame(SE)
-    def update(self, c_treshold_A:int, c_treshold_B:int, frame_x:int, frame_right:int, map_pixel_width:int):
+    def update(self, frame_x:int, frame_right:int):
         self.Jump_Queue()
         self.get_input()
         self.apply_gravity()
         self.check_no_longer_jumping()
-        self.stop_player_motion(c_treshold_A, c_treshold_B, frame_x, frame_right, map_pixel_width)
-        self.move(c_treshold_A, c_treshold_B)
+        self.stop_player_motion(frame_x, frame_right)
+        self.move()
         self.coyote_time()
         self.jump_buffer()
         self.update_animation()
         
         
     #Moves the player to the coordinates  the velocity vector points at(SE)
-    def move(self,c_treshold_A, c_treshold_B):
+    def move(self):
         self.x += self.velocity.x * self.game.dt
         self.y += self.velocity.y * self.game.dt
         self.rect.x =  round(self.x)
-        self.check_collision_with_tile('x', c_treshold_A, c_treshold_B)
+        self.check_collision_with_tile('x')
         self.rect.y = round(self.y)
-        self.check_collision_with_tile('y', c_treshold_A, c_treshold_B)
+        self.check_collision_with_tile('y')
     
     #Checks for player input and sets velocity in the x axis accordingly(SE)
     def get_input(self):
@@ -80,7 +84,7 @@ class Player(pygame.sprite.Sprite):
     
     #Checks for collisions in the  y or x direction and positions the player accordingly(SE)
     #->param dir should only be 'y' or 'x'
-    def check_collision_with_tile(self, dir:str, c_treshold_A, c_treshold_B):
+    def check_collision_with_tile(self, dir:str):
         if dir == 'x':
             hits = pygame.sprite.spritecollide(self,self.game.all_tiles,False)
             if hits:
@@ -88,9 +92,9 @@ class Player(pygame.sprite.Sprite):
                     self.x = hits[0].rect.left - self.rect.width
                 if self.velocity.x < 0:#Moving to the left when collided
                     self.x = hits[0].rect.right
-                if self.velocity.x == 0 and self.rect.right >= c_treshold_B:#When moving to the right and beyond treshold B
+                if self.velocity.x == 0 and self.rect.right >= self.TRESHOLD_B:#When moving to the right and beyond treshold B
                     self.x = hits[0].rect.left - self.rect.width 
-                if self.velocity.x == 0 and self.rect.left <= c_treshold_A:#When moving to the left and beyond treshold A
+                if self.velocity.x == 0 and self.rect.left <= self.TRESHOLD_A:#When moving to the left and beyond treshold A
                     self.x = hits[0].rect.right
                 self.velocity.x = 0
                 self.rect.x = self.x 
@@ -179,11 +183,11 @@ class Player(pygame.sprite.Sprite):
     
     #Sets player x velocity to 0 if the left of the player rect is on treshold_A or
     #If the right of the player rect is on treshold_B(SE)
-    def stop_player_motion(self, treshold_A:int, treshold_B:int, frame_x:int, frame_right:int, map_pixel_width:int):
-        if not self.camera_locked(frame_x, frame_right, map_pixel_width):
-            if self.rect.left <= treshold_A and self.velocity.x < 0:
+    def stop_player_motion(self, frame_x:int, frame_right:int):
+        if not self.camera_locked(frame_x, frame_right):
+            if self.rect.left <= self.TRESHOLD_A and self.velocity.x < 0:
                 self.velocity.x = 0
-            if self.rect.right >= treshold_B and self.velocity.x > 0:
+            if self.rect.right >= self.TRESHOLD_B and self.velocity.x > 0:
                 self.velocity.x = 0
         else:
             pass
@@ -195,8 +199,8 @@ class Player(pygame.sprite.Sprite):
     #->param map_pixel_width an integer indicating the maps pixel width
     #->returns true if frame_x is equal or inferior to 0 or if the right side of the camera frame is equal or superior to the map
     #          pixel width else false
-    def camera_locked(self,frame_x:int, frame_right:int, map_pixel_width:int):
-        if frame_x <= 0 or frame_right >= map_pixel_width:
+    def camera_locked(self,frame_x:int, frame_right:int):
+        if frame_x <= 0 or frame_right >= self.map_width:
             return True
         return False
 
@@ -245,7 +249,7 @@ class Player(pygame.sprite.Sprite):
         if self.game.debug_on:
             pygame.draw.rect(display, (255,0,0), self.rect, 1)
         
-    
+    #Calculates the right coordinates for the current player image to be showned so that it's inside the player rect
     def find_blit_coordinates(self):
             middle_of_current_surface = (self.image.get_width())/2
             middle_of_current_rect = self.rect.width/2

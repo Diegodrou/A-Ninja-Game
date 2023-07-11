@@ -12,5 +12,5 @@ class Map:
         
         #Width and Heigh of the map in pixels:
 
-        self.pixelWidth = self.tileWidth * TILE_SIZE
-        self.pixelHeight = self.tileHeight * TILE_SIZE
+        self.pixelWidth = int(self.tileWidth * TILE_SIZE * 1.125) # 2700/2400 = 1.125
+        self.pixelHeight = int(self.tileHeight * TILE_SIZE * 1.125)

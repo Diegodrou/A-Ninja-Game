@@ -12,7 +12,7 @@ class Camera:
         self.WINDOW_SIZE = (width,height)
         self.MAP = map
         self.treshold_gap = 150
-        self.CAMERA_SCROLL = 215
+        self.CAMERA_SCROLL = 4 #for :unlocked FPS --> 215 30FPS --> 7 60FPS --> 4
         self.treshold_A = self.treshold_gap
         self.treshold_B = width - self.treshold_gap
         self.scroll_amount = 0
@@ -50,16 +50,6 @@ class Camera:
             return True
         
         return False
-    
-    #Checks if the camera is out of the map
-    def out_of_map(self):
-        if self.frame.x < 0:
-            return True
-        
-        if self.frame.right > self.MAP.pixelWidth:
-            return True
-        
-        return False
 
     #Moves camera within the game map and sets the scroll amount accordingly(SE)
     #-> param target is the player
@@ -69,17 +59,17 @@ class Camera:
             if self.locked_A:
                 self.frame.x = 0
                 if self.check_if_on_treshold_B(target):
-                    self.scroll_amount = self.CAMERA_SCROLL * self.game.dt
+                    self.scroll_amount = self.CAMERA_SCROLL #* self.game.dt
                     self.frame.x += self.scroll_amount
                     self.scroll_amount = -(self.scroll_amount)
             if self.locked_B:
-                self.frame_right = 2700
+                self.frame_right = self.MAP.pixelWidth
                 if self.check_if_on_treshold_A(target):
-                    self.scroll_amount = self.CAMERA_SCROLL * self.game.dt
+                    self.scroll_amount = self.CAMERA_SCROLL #* self.game.dt
                     self.frame.x -= self.scroll_amount
                 
         else:
-            self.scroll_amount = self.CAMERA_SCROLL * self.game.dt
+            self.scroll_amount = self.CAMERA_SCROLL #* self.game.dt
             on_trA = self.check_if_on_treshold_A(target)
             on_trB = self.check_if_on_treshold_B(target)
             if on_trA:
@@ -94,15 +84,15 @@ class Camera:
         
     #Decides if the camera is locked or not(SE)
     def set_lock_state(self):
-        if self.frame.x <= 0:
+        if self.frame.x <= 0:#locked on side A
             self.locked_A = True
             self.locked_B = False
             self.locked = True
-        elif self.frame.right >= 2700:
+        elif self.frame.right >= self.MAP.pixelWidth:#locked on side B
             self.locked_B = True
             self.locked_A = False
             self.locked = True
-        else:
+        else:#Not locked
             self.locked_A = False
             self.locked_B = False
             self.locked = False
