@@ -12,7 +12,7 @@ class Camera:
         self.WINDOW_SIZE = (width,height)
         self.MAP = map
         self.treshold_gap = 150
-        self.CAMERA_SCROLL = 4 #for :unlocked FPS --> 215 30FPS --> 7 60FPS --> 4
+        self.CAMERA_SCROLL = 215 #for :unlocked FPS --> 215 30FPS --> 7 60FPS --> 4
         self.treshold_A = self.treshold_gap
         self.treshold_B = width - self.treshold_gap
         self.scroll_amount = 0
@@ -57,25 +57,29 @@ class Camera:
         if self.locked:
             self.scroll_amount = 0
             if self.locked_A:
-                self.frame.x = 0
+                #self.frame.x = 0
                 if self.check_if_on_treshold_B(target):
-                    self.scroll_amount = self.CAMERA_SCROLL #* self.game.dt
+                    self.scroll_amount = self.game.ceiling(self.CAMERA_SCROLL * self.game.dt)
+                    self.scrolling_to_end()
                     self.frame.x += self.scroll_amount
                     self.scroll_amount = -(self.scroll_amount)
             if self.locked_B:
-                self.frame_right = self.MAP.pixelWidth
+                #self.frame_right = self.MAP.pixelWidth
                 if self.check_if_on_treshold_A(target):
-                    self.scroll_amount = self.CAMERA_SCROLL #* self.game.dt
+                    self.scroll_amount = self.game.ceiling( self.CAMERA_SCROLL * self.game.dt)
+                    self.scrolling_to_start()
                     self.frame.x -= self.scroll_amount
                 
         else:
-            self.scroll_amount = self.CAMERA_SCROLL #* self.game.dt
+            self.scroll_amount = self.game.ceiling(self.CAMERA_SCROLL * self.game.dt)
             on_trA = self.check_if_on_treshold_A(target)
             on_trB = self.check_if_on_treshold_B(target)
             if on_trA:
+                self.scrolling_to_start()
                 self.frame.x -= self.scroll_amount
 
             if on_trB:
+                self.scrolling_to_end()
                 self.frame.x += self.scroll_amount
                 self.scroll_amount = -(self.scroll_amount)
         
@@ -97,7 +101,13 @@ class Camera:
             self.locked_B = False
             self.locked = False
             
-
+    def scrolling_to_end(self):
+        if (self.frame.right + self.scroll_amount > self.MAP.pixelWidth):
+            self.scroll_amount = self.MAP.pixelWidth - self.frame.right
+    
+    def scrolling_to_start(self):
+        if(self.frame.x - self.scroll_amount < 0 ):
+            self.scroll_amount = self.frame.x
 
     #Converts display pixel x coordinate to window pixel x coordinates
     #-> param n an interger

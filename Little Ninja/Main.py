@@ -1,4 +1,4 @@
-import pygame,time,os,pickle
+import pygame,time,os,pickle,math
 from pygame.locals import *
 from settings import *
 from sprites import *
@@ -91,7 +91,8 @@ class Game():
         #Game Loop: - Draw
         
         #Things drawn in the display
-        self.display.fill(DARKGREY)
+        #self.display.fill(DARKGREY)
+        self.show_background()
         for sprite in self.all_sprites:
             sprite.draw(self.display)
         
@@ -103,13 +104,24 @@ class Game():
         
         pygame.display.update()
     
+    def show_background(self):
+        for layer in self.ASSETS["BG_LAYERS"]:
+            self.display.blit(layer,(0,0))
+
     #Gets current time
     def get_time(self):
         return time.time()
     
     #Gets time since last frame (dt)
     def get_deltaTime(self):
-        return self.get_time() - self.prev_time 
+        return self.get_time() - self.prev_time
+
+    #Finds the ceilling of a given number 
+    #The term ceiling describes the nearest integer that’s greater than or equal to a given number.
+    # ->param n is a decimal number
+    # ->return the ceiling of  n 
+    def ceiling(self, n:float):
+        return math.ceil(n)
     
     #Menu Loop
     def menu_screen(self):
@@ -269,10 +281,11 @@ class Game():
 
     #Loading functions
 
-    #loads menu background /game background / botones/ tile image assets
+    #loads menu background /game background / botones/ tile image assets(SE)
     def load_assets(self):
         menu_images = []
-        bg_frames = []
+        temp_bg_layers = []
+        bg_layers = []
         botones_images = []
         tiles = []
 
@@ -282,11 +295,17 @@ class Game():
         nb_tiles = len(os.listdir(f"images/tiles"))
         
 
-        #loads menu_frames
-        for i in range(nb_bg_frames):
-            bg_frames.append(pygame.image.load(f"images/background_imgs/background_{i}.png").convert())
-        
         #loads bg_frames
+        for i in range(nb_bg_frames):
+            temp_bg_layers.append(pygame.image.load(f"images/background_imgs/background_{i}.png").convert_alpha())
+        #Transform frames to the right size
+        for frame in temp_bg_layers:
+            bg_layers.append(pygame.transform.scale(frame,DISPLAY_SIZE))
+            
+            
+
+
+        #loads menu_frames
         for n in range(nb_menu_frames):
             menu_images.append(pygame.image.load(f"images/menu_imgs/{n}.png").convert())
         
@@ -301,7 +320,7 @@ class Game():
 
         self.ASSETS["BOTONES_IMGS"] = botones_images
         self.ASSETS["MENU_FRAMES"] = menu_images
-        self.ASSETS["BG_FRAMES"] = bg_frames
+        self.ASSETS["BG_LAYERS"] = bg_layers
         self.ASSETS["TILES"] = tiles
     
     #loods levels using pickle library  
