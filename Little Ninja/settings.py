@@ -3,10 +3,10 @@
 fps = 75
 
 #window /display settings
-window_height = 416
-window_width = 600
+WINDOW_HEIGHT = 416
+WINDOW_WIDTH = 600
 DISPLAY_SIZE = (300, 208)
-window_size = (window_width, window_height)
+WINDOW_SIZE = (WINDOW_WIDTH, WINDOW_HEIGHT)
 
 #Tile settings
 TILE_SIZE = 16

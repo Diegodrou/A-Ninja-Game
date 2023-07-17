@@ -12,7 +12,7 @@ class Game():
         self.running = True
         pygame.init()
         pygame.display.set_caption(TITLE)
-        self.window = pygame.display.set_mode((window_width, window_height))
+        self.window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         self.display = pygame.Surface(DISPLAY_SIZE)
         self.clock = pygame.time.Clock()
         self.debug_on = False
@@ -25,7 +25,7 @@ class Game():
         self.all_sprites = pygame.sprite.Group()
         self.all_tiles = pygame.sprite.Group()
         map = Map(self.LEVELS[level])
-        self.camera = Camera(window_width, window_height, map, self, DISPLAY_SIZE)
+        self.camera = Camera(WINDOW_WIDTH, WINDOW_HEIGHT, map, self, DISPLAY_SIZE)
         self.setup_level(map.data,map.pixelWidth)
         
 
@@ -79,6 +79,7 @@ class Game():
         #Game Loop: - Update
         self.update_sprites()
         self.camera.update(self.player)
+        self.update_bg_layers_positions()
         
     #Updates all the sprites logic(SE)
     def update_sprites(self):
@@ -97,7 +98,7 @@ class Game():
             sprite.draw(self.display)
         
         #Things drawn in the window
-        self.window.blit(pygame.transform.scale(self.display, window_size), (0, 0))
+        self.window.blit(pygame.transform.scale(self.display, WINDOW_SIZE), (0, 0))
         
         if self.debug_on:
             self.debug()
@@ -105,8 +106,31 @@ class Game():
         pygame.display.update()
     
     def show_background(self):
-        for layer in self.ASSETS["BG_LAYERS"]:
-            self.display.blit(layer,(0,0))
+        self.display.blit(self.ASSETS["BG_LAYERS"][0],(0,0))#SKY
+        self.display.blit(self.ASSETS["BG_LAYERS"][1],(self.layer_data[1][0],0))#SUN & CLOUD
+
+
+        for i in range(2,self.nb_bg_layers) :
+            self.display.blit(self.ASSETS["BG_LAYERS"][i],(self.layer_data[i][0],0))
+            self.display.blit(self.ASSETS["BG_LAYERS"][i],(self.layer_data[i][1],0))
+
+    def update_bg_layers_positions(self):
+        self.layer_data[1][0] += self.camera.scroll_amount * self.layer_data[1][2]
+        
+        for i in range(2,len(self.layer_data)):
+            self.layer_data[i][0] += self.camera.scroll_amount * self.layer_data[i][2]
+            self.layer_data[i][1] = DISPLAY_SIZE[0] + self.layer_data[i][0]
+            
+            if self.layer_data[i][0] < -DISPLAY_SIZE[0]:
+                self.layer_data[i][0] = self.layer_data[i][1]
+                self.layer_data[i][1] = DISPLAY_SIZE[0] + self.layer_data[i][0]
+
+            if self.layer_data[i][0] > 0:
+                self.layer_data[i][1] = -DISPLAY_SIZE[0] + self.layer_data[i][0]
+                if self.layer_data[i][0] > DISPLAY_SIZE[0]:
+                    self.layer_data[i][0] = self.layer_data[i][1]
+
+        
 
     #Gets current time
     def get_time(self):
@@ -118,7 +142,7 @@ class Game():
 
     #Finds the ceilling of a given number 
     #The term ceiling describes the nearest integer that’s greater than or equal to a given number.
-    # ->param n is a decimal number
+    # ->param n is a floating point number
     # ->return the ceiling of  n 
     def ceiling(self, n:float):
         return math.ceil(n)
@@ -153,7 +177,7 @@ class Game():
             # All Draws
             self.display.blit(pygame.transform.scale(BACKGROUND_ANIM[anim_index], DISPLAY_SIZE), (0, 0))
             
-            self.window.blit(pygame.transform.scale(self.display, window_size), (0, 0))
+            self.window.blit(pygame.transform.scale(self.display, WINDOW_SIZE), (0, 0))
             
             level_1_b.draw(self.window)
             
@@ -288,16 +312,29 @@ class Game():
         bg_layers = []
         botones_images = []
         tiles = []
+        self.layer_data = []
 
-        nb_bg_frames = len(os.listdir(f"images/background_imgs"))
+        self.nb_bg_layers = len(os.listdir(f"images/background_imgs"))
         nb_menu_frames = len(os.listdir(f"images/menu_imgs"))
         nb_botones = len(os.listdir(f"images/botones"))
         nb_tiles = len(os.listdir(f"images/tiles"))
         
+        
 
-        #loads bg_frames
-        for i in range(nb_bg_frames):
+        #Loads bg_frames
+        for i in range(self.nb_bg_layers):
             temp_bg_layers.append(pygame.image.load(f"images/background_imgs/background_{i}.png").convert_alpha())
+        
+        #Loads data for the background layers
+        sub_v = 1/(self.nb_bg_layers - 2)#value that gets substracted to the speed of the layer(for the parallax effect)
+        self.layer_data.append([0,0,0])#sky layer data
+        self.layer_data.append([0,0,0.01])# sun & cloud layer data
+
+        for index in range(1,self.nb_bg_layers - 1):
+            self.layer_data.append([0,0,0 + (index) * sub_v] )#0: X1(blit position 1) 1: X2 (blit position 2) 2:speed 3:current_treshold
+            
+        #print(self.LAYER_DATA)
+
         #Transform frames to the right size
         for frame in temp_bg_layers:
             bg_layers.append(pygame.transform.scale(frame,DISPLAY_SIZE))

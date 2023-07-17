@@ -57,14 +57,12 @@ class Camera:
         if self.locked:
             self.scroll_amount = 0
             if self.locked_A:
-                #self.frame.x = 0
                 if self.check_if_on_treshold_B(target):
                     self.scroll_amount = self.game.ceiling(self.CAMERA_SCROLL * self.game.dt)
                     self.scrolling_to_end()
                     self.frame.x += self.scroll_amount
                     self.scroll_amount = -(self.scroll_amount)
             if self.locked_B:
-                #self.frame_right = self.MAP.pixelWidth
                 if self.check_if_on_treshold_A(target):
                     self.scroll_amount = self.game.ceiling( self.CAMERA_SCROLL * self.game.dt)
                     self.scrolling_to_start()
