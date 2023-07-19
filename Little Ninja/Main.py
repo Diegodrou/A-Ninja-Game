@@ -24,6 +24,8 @@ class Game():
     def new_game(self,level:int):
         self.all_sprites = pygame.sprite.Group()
         self.all_tiles = pygame.sprite.Group()
+        self.all_enemies = pygame.sprite.Group()
+        self.all_bullets = pygame.sprite.Group()
         map = Map(self.LEVELS[level])
         self.camera = Camera(WINDOW_WIDTH, WINDOW_HEIGHT, map, self, DISPLAY_SIZE)
         self.setup_level(map.data,map.pixelWidth)
@@ -92,7 +94,6 @@ class Game():
         #Game Loop: - Draw
         
         #Things drawn in the display
-        #self.display.fill(DARKGREY)
         self.show_background()
         for sprite in self.all_sprites:
             sprite.draw(self.display)
@@ -105,15 +106,17 @@ class Game():
         
         pygame.display.update()
     
+    # Blit's background layers to the display surface(SE)
     def show_background(self):
         self.display.blit(self.ASSETS["BG_LAYERS"][0],(0,0))#SKY
         self.display.blit(self.ASSETS["BG_LAYERS"][1],(self.layer_data[1][0],0))#SUN & CLOUD
 
-
+        #The rest
         for i in range(2,self.nb_bg_layers) :
             self.display.blit(self.ASSETS["BG_LAYERS"][i],(self.layer_data[i][0],0))
             self.display.blit(self.ASSETS["BG_LAYERS"][i],(self.layer_data[i][1],0))
-
+    
+    # Updates the position of all background layers(SE)
     def update_bg_layers_positions(self):
         self.layer_data[1][0] += self.camera.scroll_amount * self.layer_data[1][2]
         

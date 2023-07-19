@@ -16,8 +16,6 @@ class Player(pygame.sprite.Sprite):
         self.image = self.animation_list[self.action][self.index]
         self.rect = pygame.Rect((0,0), (13, 16))
         self.flip = False
-        self.width = self.image.get_width()
-        self.height = self.image.get_height()
         self.PLAYER_ANIMATION_COOLDOWN = 125
         self.update_time = pygame.time.get_ticks()
         
@@ -272,8 +270,51 @@ class Player(pygame.sprite.Sprite):
 
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, start_position:tuple):
+    def __init__(self,game_attributes ,spawn_pos:tuple):
+        self.groups = game_attributes.all_sprites, game_attributes.all_enemies
+        pygame.sprite.Sprite.__init__(self,self.groups)
+        
+        #Enemy animtion stuff
+        self.ANIMATION_TYPES:list[str] = ["idle","run"]
+        self.animation_list = self.load_enemy_assets()
+        self.anim_index = 0
+        self.anim_action = 0 
+        self.image = self.animation_list[self.anim_action][self.anim_index]
+        self.rect = pygame.Rect((0,0), (13, 16))
+        self.flip = False
+        self.ENEMY_ANIMATION_COOLDOWN = 125
+        self.update_time = pygame.time.get_ticks()
+
+        #Enemy movement stuff
+        self.velocity  = pygame.math.Vector2(0,0) 
+        self.speed = 180
+        self.moving_right = False
+        self.moving_left = False
+        self.gravity = 830
+
+        # Other player attributes
+        self.dead = False
+
+        self.x = spawn_pos[0] * TILE_SIZE
+        self.y = spawn_pos[1] * TILE_SIZE
+    
+    def update(self):
         pass
+
+    def draw(self):
+        pass
+
+    def load_enemy_assets(self):
+        animation_list = []
+        for animation in self.ANIMATION_TYPES:
+            temp_list = []
+            
+            num_of_frames = len(os.listdir(f'images/enemy_imgs/{animation}'))
+            for i in range(num_of_frames):
+                e_img = pygame.image.load(os.path.join("images", "enemy_imgs", animation, f'{i}.png'))
+                temp_list.append(e_img)
+            animation_list.append(temp_list)
+        return animation_list
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, game_attributes, image:pygame.Surface, spawn_pos:tuple):
