@@ -329,11 +329,12 @@ class Game():
         sub_v = 1/(self.nb_bg_layers - 2)#value that gets substracted to the speed of the layer(for the parallax effect)
         self.layer_data.append([0,0,0])#sky layer data
         self.layer_data.append([0,0,0.01])# sun & cloud layer data
+        max_index = self.nb_bg_layers - 1
 
-        for index in range(1,self.nb_bg_layers - 1):
+        for index in range(1,max_index):
             self.layer_data.append([0,0,0 + (index) * sub_v] )#0: X1(blit position 1) 1: X2 (blit position 2) 2:speed 3:current_treshold
             
-        #print(self.LAYER_DATA)
+        self.layer_data[max_index][2] = 1 - 0.09  
 
         #Transform frames to the right size
         for frame in temp_bg_layers:
