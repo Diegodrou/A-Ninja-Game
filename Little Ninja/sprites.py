@@ -273,9 +273,11 @@ class Enemy(pygame.sprite.Sprite):
     def __init__(self,game_attributes ,spawn_pos:tuple):
         self.groups = game_attributes.all_sprites, game_attributes.all_enemies
         pygame.sprite.Sprite.__init__(self,self.groups)
+        self.game = game_attributes
         
         #Enemy animtion stuff
         self.ANIMATION_TYPES:list[str] = ["idle","run"]
+        self.ENEMY_STATES :list[str] = ["idle", "attacking"]
         self.animation_list = self.load_enemy_assets()
         self.anim_index = 0
         self.anim_action = 0 
@@ -291,14 +293,121 @@ class Enemy(pygame.sprite.Sprite):
         self.moving_right = False
         self.moving_left = False
         self.gravity = 830
+        self.enemy_clock = 1
+        self.on_ground = True
+        self.jumping = False
 
         # Other player attributes
         self.dead = False
+        self.VISION_RANGE = 10
+        self.state:str = self.ENEMY_STATES[0]
 
         self.x = spawn_pos[0] * TILE_SIZE
         self.y = spawn_pos[1] * TILE_SIZE
     
     def update(self):
+        self.enemy_AI()
+        self.apply_gravity()
+        
+        
+    #Determines whether if  the enemy is idle or attacking the player(SE)
+    def decide_enemy_state(self):
+        if self.player_in_range():
+            self.state = self.ENEMY_STATES[1]
+        else:
+            self.state = self.ENEMY_STATES[0]
+        
+    #Checks if the player is inside the range of vision of the enemy
+    def player_in_range(self):
+        player_in_range_bool = self.game.player.rect.left > self.rect.centerx - self.VISION_RANGE or self.game.player.rect.right < self.rect.centerx + self.VISION_RANGE
+        if player_in_range_bool:
+            return True
+        else:
+            return False            
+
+    def apply_gravity(self):
+        self.velocity.y += self.gravity * self.game.dt
+        if self.velocity.y > 1500:
+            self.velocity.y = 1500
+
+    def enemy_AI(self):
+        self.decide_enemy_state()
+        if self.state == self.ENEMY_STATES[0]:#idle:
+            if self.enemy_clock < 2:#standing still
+                self.stay_still()
+            if self.enemy_clock > 2 and self.enemy_clock < 4:# moving right
+                self.move_right()
+            if self.enemy_clock > 4 and self.enemy_clock < 6:# moving left
+                self.move_left()
+        if self.state == self.ENEMY_STATES[1]:#attacking
+            pass
+        
+        if self.moving_left:
+            self.velocity.x = -self.speed
+            self.flip = True
+
+        elif self.moving_right:
+            self.velocity.x = self.speed
+            self.flip = False   
+        else:
+            self.velocity.x = 0
+
+
+    def stay_still(self):
+        self.moving_left = False
+        self.moving_right = False
+    
+    def move_right(self):
+        self.moving_right = True
+        self.moving_left = False
+    
+    def move_left(self):
+        self.moving_left = True
+        self.moving_right = False
+
+    def move_enemy(self):
+        self.x += self.velocity.x * self.game.dt
+        self.y += self.velocity.y * self.game.dt
+        self.rect.x =  round(self.x)
+        self.check_collision_with_tile('x')
+        self.rect.y = round(self.y)
+        self.check_collision_with_tile('y')
+    
+    def check_collision_with_tile(self, dir:str):
+        if dir == 'x':
+            hits = pygame.sprite.spritecollide(self,self.game.all_tiles,False)
+            if hits:
+                if self.velocity.x > 0:#Moving to the right when collided
+                    self.x = hits[0].rect.left - self.rect.width
+                if self.velocity.x < 0:#Moving to the left when collided
+                    self.x = hits[0].rect.right
+                if self.velocity.x == 0 and self.rect.right >= self.TRESHOLD_B:#When moving to the right and beyond treshold B
+                    self.x = hits[0].rect.left - self.rect.width 
+                if self.velocity.x == 0 and self.rect.left <= self.TRESHOLD_A:#When moving to the left and beyond treshold A
+                    self.x = hits[0].rect.right
+                self.velocity.x = 0
+                self.rect.x = self.x 
+        if dir == 'y':
+            hits = pygame.sprite.spritecollide(self,self.game.all_tiles,False)
+            if hits:
+                if self.velocity.y > 0:#Moving down when collided
+                    self.y = hits[0].rect.top - self.rect.height
+                    self.on_ground = True # on ground <--> colliding on the y axis & velocity.y > 0
+                    self.jumping = False
+                if self.velocity.y < 0:#Moving up when collided
+                    self.y = hits[0].rect.bottom
+                self.velocity.y = 0
+                self.rect.y = self.y
+            self.check_not_on_ground()
+
+    #Checks if the enemy is no longer on the ground(SE)
+    #enemy not on ground <-->  14.8 < velocity.y or velocity.y < 0 (because of velocity bug)
+    def check_not_on_ground(self):
+        if self.velocity.y > 27 or self.velocity.y < 0: #14.7 --> 60fps|| 27 --> unlocked fps
+            self.on_ground = False
+            #print(self.velocity.y)
+
+    def attack(self):
         pass
 
     def draw(self):
