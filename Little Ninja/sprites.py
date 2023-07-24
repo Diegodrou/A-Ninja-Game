@@ -293,7 +293,7 @@ class Enemy(pygame.sprite.Sprite):
         self.moving_right = False
         self.moving_left = False
         self.gravity = 830
-        self.enemy_clock = 1
+        self.enemy_clock = 0
         self.on_ground = True
         self.jumping = False
 
@@ -311,7 +311,8 @@ class Enemy(pygame.sprite.Sprite):
         self.enemy_AI()
         self.apply_gravity()
         self.move_enemy()
-        self.enemy_clock += 1 * self.game.dt
+        self.update_animation()
+        self.enemy_clock += 10 * self.game.dt
         
         
     #Determines whether if  the enemy is idle or attacking the player(SE)
@@ -422,10 +423,47 @@ class Enemy(pygame.sprite.Sprite):
         if self.player_is_to_the_left:
             return Bullet(self.game, self.rect.midleft,-1)
         if self.player_is_to_the_right:
-            return Bullet(self.game, self.rect.midleft,1)
+            return Bullet(self.game, self.rect.midright,1)
 
-    def draw(self):
-        pass
+    def draw(self, display:pygame.Surface):
+        display.blit(pygame.transform.flip(self.image,self.flip,False), (self.rect.x,self.rect.y))
+        if self.game.debug_on:
+            pygame.draw.rect(display, (0,0,255), self.rect, 1)
+    #Handles animation logic (SE)
+    #Changing animation frame & reseting animation when it's done 
+    # & changing the  animation depending on the action
+    def update_animation(self):
+        
+        # update img depending on current frame
+        self.image = self.animation_list[self.anim_action][self.anim_index]
+
+        # check if enough time has passed since the last update
+        if pygame.time.get_ticks() - self.update_time > self.ENEMY_ANIMATION_COOLDOWN:
+            self.update_time = pygame.time.get_ticks()
+            self.anim_index += 1
+
+            # if the animation has run out , reset back to the start
+            if self.anim_index >= len(self.animation_list[self.anim_action]):
+                self.anim_index = 0
+
+        #Changes action
+        if not self.dead:
+            if self.state == self.ANIMATION_TYPES[1]:
+                self.update_action(1)  # 1:run
+
+            else:
+                self.update_action(0)  # 0:idle
+
+    #Changes player's current action to the next action
+    def update_action(self, new_action:int):
+
+        # check if new action is different to the previous
+        if new_action != self.anim_action:
+            self.anim_action = new_action
+            # update the anim settings
+            self.anim_index = 0
+            self.update_time = self.game.dt
+
 
     def load_enemy_assets(self):
         animation_list = []
@@ -466,14 +504,16 @@ class Bullet(pygame.sprite.Sprite):
         self.BULLET_SPEED = 3
         self.velocity = pygame.math.Vector2(0,0)
         self.velocity.x = direction * self.speed
-        self.x = spawn_pos[0]
-        self.y = spawn_pos[1]
-        self.rect.x = spawn_pos[0]
+        self.x:float = spawn_pos[0]
+        self.y:float = spawn_pos[1]
+        self.rect.x:int = spawn_pos[0]
+        self.rect.y:int = spawn_pos[1]
 
 
     def update(self):
         self.x += self.velocity.x * self.game.dt
         self.rect.x = round(self.x)
+        self.rect.y = self.y
         self.check_for_collision()
 
     def check_for_collision(self):

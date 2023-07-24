@@ -87,8 +87,11 @@ class Game():
         
     #Updates all the sprites logic(SE)
     def update_sprites(self):
-        for sprite in self.all_sprites:
+        for sprite in self.player_and_tiles:
             sprite.update(self.camera.frame.x, self.camera.frame.right)
+        
+        for enemy in self.all_enemies:
+            enemy.update()
         
 
     #Renders everything(SE) 
@@ -97,8 +100,8 @@ class Game():
         
         #Things drawn in the display
         self.show_background()
-        for sprite in self.all_sprites:
-            sprite.draw(self.display)
+        self.draw_sprites()
+        
         
         #Things drawn in the window
         self.window.blit(pygame.transform.scale(self.display, WINDOW_SIZE), (0, 0))
@@ -108,6 +111,10 @@ class Game():
         
         pygame.display.update()
     
+    def draw_sprites(self):
+        for sprite in self.all_sprites:
+            sprite.draw(self.display)
+
     # Blit's background layers to the display surface(SE)
     def show_background(self):
         self.display.blit(self.ASSETS["BG_LAYERS"][0],(0,0))#SKY
@@ -387,7 +394,7 @@ class Game():
                                          self.camera.window_px_to_display_px(self.camera.treshold_A), 
                                          self.camera.window_px_to_display_px(self.camera.treshold_B))
                 if tile == 2:
-                    pass
+                    Enemy(self,(col, row))
 
 
 G = Game()
