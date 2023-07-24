@@ -26,6 +26,8 @@ class Game():
         self.all_tiles = pygame.sprite.Group()
         self.all_enemies = pygame.sprite.Group()
         self.all_bullets = pygame.sprite.Group()
+        self.player_and_tiles = pygame.sprite.Group()
+        self.player_group = pygame.sprite.GroupSingle()
         map = Map(self.LEVELS[level])
         self.camera = Camera(WINDOW_WIDTH, WINDOW_HEIGHT, map, self, DISPLAY_SIZE)
         self.setup_level(map.data,map.pixelWidth)

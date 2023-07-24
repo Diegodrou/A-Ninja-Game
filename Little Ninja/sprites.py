@@ -4,7 +4,7 @@ from settings import *
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, game_attritues, spawn_pos:tuple, map_width:int, TRH_A:int, TRH_B:int):
-        self.groups = game_attritues.all_sprites
+        self.groups = game_attritues.all_sprites, game_attritues.player_group , game_attritues.player_and_tiles
         #The class constructor (__init__ method) takes an argument of a Group (or list of Groups) the Sprite instance should belong to. 
         pygame.sprite.Sprite.__init__(self,self.groups)
         self.game = game_attritues
@@ -301,6 +301,8 @@ class Enemy(pygame.sprite.Sprite):
         self.dead = False
         self.VISION_RANGE = 10
         self.state:str = self.ENEMY_STATES[0]
+        self.player_is_to_the_right = False
+        self.player_is_to_the_left = False
 
         self.x = spawn_pos[0] * TILE_SIZE
         self.y = spawn_pos[1] * TILE_SIZE
@@ -308,6 +310,8 @@ class Enemy(pygame.sprite.Sprite):
     def update(self):
         self.enemy_AI()
         self.apply_gravity()
+        self.move_enemy()
+        self.enemy_clock += 1 * self.game.dt
         
         
     #Determines whether if  the enemy is idle or attacking the player(SE)
@@ -319,7 +323,9 @@ class Enemy(pygame.sprite.Sprite):
         
     #Checks if the player is inside the range of vision of the enemy
     def player_in_range(self):
-        player_in_range_bool = self.game.player.rect.left > self.rect.centerx - self.VISION_RANGE or self.game.player.rect.right < self.rect.centerx + self.VISION_RANGE
+        self.player_is_to_the_right = self.game.player.rect.left > self.rect.centerx - self.VISION_RANGE
+        self.player_is_to_the_left =  self.game.player.rect.right < self.rect.centerx + self.VISION_RANGE
+        player_in_range_bool = self.player_is_to_the_right or self.player_is_to_the_left
         if player_in_range_bool:
             return True
         else:
@@ -340,15 +346,20 @@ class Enemy(pygame.sprite.Sprite):
             if self.enemy_clock > 4 and self.enemy_clock < 6:# moving left
                 self.move_left()
         if self.state == self.ENEMY_STATES[1]:#attacking
-            pass
+            self.stay_still()
+            if self.player_is_to_the_right:
+                self.flip = True
+            if self.player_is_to_the_left:
+                self.flip = False
+
         
         if self.moving_left:
             self.velocity.x = -self.speed
-            self.flip = True
+            self.flip = False
 
         elif self.moving_right:
             self.velocity.x = self.speed
-            self.flip = False   
+            self.flip = True   
         else:
             self.velocity.x = 0
 
@@ -408,7 +419,10 @@ class Enemy(pygame.sprite.Sprite):
             #print(self.velocity.y)
 
     def attack(self):
-        pass
+        if self.player_is_to_the_left:
+            return Bullet(self.game, self.rect.midleft,-1)
+        if self.player_is_to_the_right:
+            return Bullet(self.game, self.rect.midleft,1)
 
     def draw(self):
         pass
@@ -427,7 +441,7 @@ class Enemy(pygame.sprite.Sprite):
 
 class Tile(pygame.sprite.Sprite):
     def __init__(self, game_attributes, image:pygame.Surface, spawn_pos:tuple):
-        self.groups = game_attributes.all_sprites, game_attributes.all_tiles
+        self.groups = game_attributes.all_sprites, game_attributes.all_tiles, game_attributes.player_and_tiles
         #The class constructor (__init__ method) takes an argument of a Group (or list of Groups) the Sprite instance should belong to. 
         pygame.sprite.Sprite.__init__(self,self.groups)
         self.x = spawn_pos[0]
@@ -439,3 +453,30 @@ class Tile(pygame.sprite.Sprite):
 
     def draw(self,display):
         display.blit(self.image,(self.rect.x,self.rect.y ))
+
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self, game_attributes, spawn_pos:tuple , direction:int):
+        self.groups = game_attributes.all_sprites, game_attributes.all_bullets
+        #The class constructor (__init__ method) takes an argument of a Group (or list of Groups) the Sprite instance should belong to. 
+        pygame.sprite.Sprite.__init__(self,self.groups)
+        self.game = game_attributes
+        self.image = pygame.Surface((3,2))
+        self.image.fill((255,255,255))
+        self.rect = self.image.get_rect()
+        self.BULLET_SPEED = 3
+        self.velocity = pygame.math.Vector2(0,0)
+        self.velocity.x = direction * self.speed
+        self.x = spawn_pos[0]
+        self.y = spawn_pos[1]
+        self.rect.x = spawn_pos[0]
+
+
+    def update(self):
+        self.x += self.velocity.x * self.game.dt
+        self.rect.x = round(self.x)
+        self.check_for_collision()
+
+    def check_for_collision(self):
+        hits = pygame.sprite.spritecollideany(self,self.game.player_and_tiles)
+        if hits:
+            self.kill()
