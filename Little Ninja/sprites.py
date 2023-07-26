@@ -289,7 +289,7 @@ class Enemy(pygame.sprite.Sprite):
 
         #Enemy movement stuff
         self.velocity  = pygame.math.Vector2(0,0) 
-        self.speed = 180
+        self.speed = 100
         self.moving_right = False
         self.moving_left = False
         self.gravity = 830
@@ -299,7 +299,7 @@ class Enemy(pygame.sprite.Sprite):
 
         # Other player attributes
         self.dead = False
-        self.VISION_RANGE = 10
+        self.VISION_RANGE = 30
         self.state:str = self.ENEMY_STATES[0]
         self.player_is_to_the_right = False
         self.player_is_to_the_left = False
@@ -312,7 +312,9 @@ class Enemy(pygame.sprite.Sprite):
         self.apply_gravity()
         self.move_enemy()
         self.update_animation()
-        self.enemy_clock += 10 * self.game.dt
+        self.enemy_clock += 1 * self.game.dt
+        if self.enemy_clock >= 3:
+            self.enemy_clock = 0
         
         
     #Determines whether if  the enemy is idle or attacking the player(SE)
@@ -324,9 +326,13 @@ class Enemy(pygame.sprite.Sprite):
         
     #Checks if the player is inside the range of vision of the enemy
     def player_in_range(self):
-        self.player_is_to_the_right = self.game.player.rect.left > self.rect.centerx - self.VISION_RANGE
-        self.player_is_to_the_left =  self.game.player.rect.right < self.rect.centerx + self.VISION_RANGE
-        player_in_range_bool = self.player_is_to_the_right or self.player_is_to_the_left
+        self.player_is_to_the_right = self.game.player.rect.right >= self.rect.centerx
+        self.player_is_to_the_left =  self.game.player.rect.right <= self.rect.centerx 
+        
+        rect_left = (self.game.player.rect.left <= self.rect.centerx + self.VISION_RANGE) and (self.game.player.rect.left >= self.rect.centerx - self.VISION_RANGE)
+        rect_right = (self.game.player.rect.right >= self.rect.centerx - self.VISION_RANGE) and (self.game.player.rect.right <= self.rect.centerx + self.VISION_RANGE)
+
+        player_in_range_bool = rect_left or rect_right
         if player_in_range_bool:
             return True
         else:
@@ -340,11 +346,12 @@ class Enemy(pygame.sprite.Sprite):
     def enemy_AI(self):
         self.decide_enemy_state()
         if self.state == self.ENEMY_STATES[0]:#idle:
+            #print(self.enemy_clock)
             if self.enemy_clock < 2:#standing still
                 self.stay_still()
-            if self.enemy_clock > 2 and self.enemy_clock < 4:# moving right
+            if self.enemy_clock > 2 and self.enemy_clock < 2.5:# moving right
                 self.move_right()
-            if self.enemy_clock > 4 and self.enemy_clock < 6:# moving left
+            if self.enemy_clock > 2.5 and self.enemy_clock < 3:# moving left
                 self.move_left()
         if self.state == self.ENEMY_STATES[1]:#attacking
             self.stay_still()
@@ -378,7 +385,7 @@ class Enemy(pygame.sprite.Sprite):
         self.moving_right = False
 
     def move_enemy(self):
-        self.x += self.velocity.x * self.game.dt
+        self.x += self.velocity.x * self.game.dt + self.game.camera.scroll_amount
         self.y += self.velocity.y * self.game.dt
         self.rect.x =  round(self.x)
         self.check_collision_with_tile('x')
@@ -429,6 +436,8 @@ class Enemy(pygame.sprite.Sprite):
         display.blit(pygame.transform.flip(self.image,self.flip,False), (self.rect.x,self.rect.y))
         if self.game.debug_on:
             pygame.draw.rect(display, (0,0,255), self.rect, 1)
+            display.blit(pygame.Surface((5,5)),(self.rect.centerx + self.VISION_RANGE, self.rect.y))
+            display.blit(pygame.Surface((5,5)),(self.rect.centerx - self.VISION_RANGE, self.rect.y))
     #Handles animation logic (SE)
     #Changing animation frame & reseting animation when it's done 
     # & changing the  animation depending on the action
