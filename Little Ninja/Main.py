@@ -92,6 +92,12 @@ class Game():
         
         for enemy in self.all_enemies:
             enemy.update()
+            bullet = enemy.attack()
+            if bullet != None:
+                self.all_bullets.add(bullet)
+        
+        for bullet in self.all_bullets:
+            bullet.update()
         
 
     #Renders everything(SE) 

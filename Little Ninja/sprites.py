@@ -81,6 +81,7 @@ class Player(pygame.sprite.Sprite):
             self.velocity.x = 0      
     
     #Checks for collisions in the  y or x direction and positions the player accordingly(SE)
+    #Also checks if the player is on the ground
     #->param dir should only be 'y' or 'x'
     def check_collision_with_tile(self, dir:str):
         if dir == 'x':
@@ -282,7 +283,7 @@ class Enemy(pygame.sprite.Sprite):
         self.anim_index = 0
         self.anim_action = 0 
         self.image = self.animation_list[self.anim_action][self.anim_index]
-        self.rect = pygame.Rect((0,0), (13, 16))
+        self.rect = pygame.Rect((100,0), (13, 16))#100 to fix a bullet spawning bug
         self.flip = False
         self.ENEMY_ANIMATION_COOLDOWN = 125
         self.update_time = pygame.time.get_ticks()
@@ -299,14 +300,16 @@ class Enemy(pygame.sprite.Sprite):
 
         # Other player attributes
         self.dead = False
-        self.VISION_RANGE = 30
+        self.VISION_RANGE = 50
         self.state:str = self.ENEMY_STATES[0]
         self.player_is_to_the_right = False
         self.player_is_to_the_left = False
+        self.attacking = False
 
         self.x = spawn_pos[0] * TILE_SIZE
         self.y = spawn_pos[1] * TILE_SIZE
     
+    #Updates the enemy logic every frame(SE)
     def update(self):
         self.enemy_AI()
         self.apply_gravity()
@@ -326,9 +329,6 @@ class Enemy(pygame.sprite.Sprite):
         
     #Checks if the player is inside the range of vision of the enemy
     def player_in_range(self):
-        self.player_is_to_the_right = self.game.player.rect.right >= self.rect.centerx
-        self.player_is_to_the_left =  self.game.player.rect.right <= self.rect.centerx 
-        
         rect_left = (self.game.player.rect.left <= self.rect.centerx + self.VISION_RANGE) and (self.game.player.rect.left >= self.rect.centerx - self.VISION_RANGE)
         rect_right = (self.game.player.rect.right >= self.rect.centerx - self.VISION_RANGE) and (self.game.player.rect.right <= self.rect.centerx + self.VISION_RANGE)
 
@@ -337,16 +337,20 @@ class Enemy(pygame.sprite.Sprite):
             return True
         else:
             return False            
-
+    
+    #Apply's gravity to the enemy(SE)
     def apply_gravity(self):
         self.velocity.y += self.gravity * self.game.dt
         if self.velocity.y > 1500:
             self.velocity.y = 1500
-
+    
+    #Decides the actions  the enemy is gonna perform(attacking,moving idly)(SE)
     def enemy_AI(self):
         self.decide_enemy_state()
+        self.player_is_to_the_right = self.game.player.rect.right >= self.rect.centerx #True if player is to the right of the enemy
+        self.player_is_to_the_left =  self.game.player.rect.right <= self.rect.centerx #True if player is to the left of the enemy
+        
         if self.state == self.ENEMY_STATES[0]:#idle:
-            #print(self.enemy_clock)
             if self.enemy_clock < 2:#standing still
                 self.stay_still()
             if self.enemy_clock > 2 and self.enemy_clock < 2.5:# moving right
@@ -357,8 +361,10 @@ class Enemy(pygame.sprite.Sprite):
             self.stay_still()
             if self.player_is_to_the_right:
                 self.flip = True
+                self.attacking = True
             if self.player_is_to_the_left:
                 self.flip = False
+                self.attacking = True
 
         
         if self.moving_left:
@@ -371,19 +377,24 @@ class Enemy(pygame.sprite.Sprite):
         else:
             self.velocity.x = 0
 
-
+    #Makes the enemy stay still(SE)
+    #This fucntion should be used inside the enemy_AI function
     def stay_still(self):
         self.moving_left = False
         self.moving_right = False
     
+    #Makes the enemy move to the right(SE)
+    #This fucntion should be used inside the enemy_AI function
     def move_right(self):
         self.moving_right = True
         self.moving_left = False
-    
+    #Makes the enemy move to the left(SE)
+    #This fucntion should be used inside the enemy_AI function
     def move_left(self):
         self.moving_left = True
         self.moving_right = False
-
+    
+    #Moves the enemy to the coordinates  the velocity vector points at(SE)
     def move_enemy(self):
         self.x += self.velocity.x * self.game.dt + self.game.camera.scroll_amount
         self.y += self.velocity.y * self.game.dt
@@ -392,6 +403,9 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.y = round(self.y)
         self.check_collision_with_tile('y')
     
+    #Checks for collisions in the  y or x direction and positions the enemy accordingly(SE)
+    #Also checks if the enemy is on the ground
+    #->param dir should only be 'y' or 'x'
     def check_collision_with_tile(self, dir:str):
         if dir == 'x':
             hits = pygame.sprite.spritecollide(self,self.game.all_tiles,False)
@@ -425,12 +439,19 @@ class Enemy(pygame.sprite.Sprite):
         if self.velocity.y > 27 or self.velocity.y < 0: #14.7 --> 60fps|| 27 --> unlocked fps
             self.on_ground = False
             #print(self.velocity.y)
-
+    
+    #Makes the enemy shoot
+    #-> returns a Bullet object set to a position depending on the position of the player(player is to the left or to the right?)
     def attack(self):
-        if self.player_is_to_the_left:
-            return Bullet(self.game, self.rect.midleft,-1)
-        if self.player_is_to_the_right:
-            return Bullet(self.game, self.rect.midright,1)
+        if self.attacking:
+            if self.player_is_to_the_left:
+                self.attacking = False
+                return Bullet(self.game, self.rect.midleft,-1)
+            elif self.player_is_to_the_right:
+                self.attacking = False
+                return Bullet(self.game, self.rect.midright,1)
+            else:
+                return None
 
     def draw(self, display:pygame.Surface):
         display.blit(pygame.transform.flip(self.image,self.flip,False), (self.rect.x,self.rect.y))
@@ -481,7 +502,7 @@ class Enemy(pygame.sprite.Sprite):
             
             num_of_frames = len(os.listdir(f'images/enemy_imgs/{animation}'))
             for i in range(num_of_frames):
-                e_img = pygame.image.load(os.path.join("images", "enemy_imgs", animation, f'{i}.png'))
+                e_img = pygame.transform.scale_by(pygame.image.load(os.path.join("images", "enemy_imgs", animation, f'{i}.png')),1.5)
                 temp_list.append(e_img)
             animation_list.append(temp_list)
         return animation_list
@@ -510,17 +531,15 @@ class Bullet(pygame.sprite.Sprite):
         self.image = pygame.Surface((3,2))
         self.image.fill((255,255,255))
         self.rect = self.image.get_rect()
-        self.BULLET_SPEED = 3
+        self.BULLET_SPEED = 80
         self.velocity = pygame.math.Vector2(0,0)
-        self.velocity.x = direction * self.speed
+        self.velocity.x = direction * self.BULLET_SPEED
         self.x:float = spawn_pos[0]
         self.y:float = spawn_pos[1]
-        self.rect.x:int = spawn_pos[0]
-        self.rect.y:int = spawn_pos[1]
 
 
     def update(self):
-        self.x += self.velocity.x * self.game.dt
+        self.x += self.velocity.x * self.game.dt + self.game.camera.scroll_amount
         self.rect.x = round(self.x)
         self.rect.y = self.y
         self.check_for_collision()
@@ -529,3 +548,6 @@ class Bullet(pygame.sprite.Sprite):
         hits = pygame.sprite.spritecollideany(self,self.game.player_and_tiles)
         if hits:
             self.kill()
+    
+    def draw(self,display):
+        display.blit(self.image,(self.rect.x,self.rect.y ))
