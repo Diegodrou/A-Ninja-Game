@@ -286,7 +286,9 @@ class Enemy(pygame.sprite.Sprite):
         self.rect = pygame.Rect((100,0), (13, 16))#100 to fix a bullet spawning bug
         self.flip = False
         self.ENEMY_ANIMATION_COOLDOWN = 125
+        self.SHOOTING_COOLDOWN = 230
         self.update_time = pygame.time.get_ticks()
+        self.shooting_update_time = pygame.time.get_ticks()
 
         #Enemy movement stuff
         self.velocity  = pygame.math.Vector2(0,0) 
@@ -300,7 +302,7 @@ class Enemy(pygame.sprite.Sprite):
 
         # Other player attributes
         self.dead = False
-        self.VISION_RANGE = 50
+        self.VISION_RANGE = 100
         self.state:str = self.ENEMY_STATES[0]
         self.player_is_to_the_right = False
         self.player_is_to_the_left = False
@@ -329,10 +331,11 @@ class Enemy(pygame.sprite.Sprite):
         
     #Checks if the player is inside the range of vision of the enemy
     def player_in_range(self):
-        rect_left = (self.game.player.rect.left <= self.rect.centerx + self.VISION_RANGE) and (self.game.player.rect.left >= self.rect.centerx - self.VISION_RANGE)
-        rect_right = (self.game.player.rect.right >= self.rect.centerx - self.VISION_RANGE) and (self.game.player.rect.right <= self.rect.centerx + self.VISION_RANGE)
-
-        player_in_range_bool = rect_left or rect_right
+        player_rect_left = (self.game.player.rect.left <= self.rect.centerx + self.VISION_RANGE) and (self.game.player.rect.left >= self.rect.centerx - self.VISION_RANGE)
+        player_rect_right = (self.game.player.rect.right >= self.rect.centerx - self.VISION_RANGE) and (self.game.player.rect.right <= self.rect.centerx + self.VISION_RANGE)
+        player_rect_bottom = self.game.player.rect.bottom >= self.rect.top
+    
+        player_in_range_bool = (player_rect_left or player_rect_right) and player_rect_bottom
         if player_in_range_bool:
             return True
         else:
@@ -361,10 +364,14 @@ class Enemy(pygame.sprite.Sprite):
             self.stay_still()
             if self.player_is_to_the_right:
                 self.flip = True
-                self.attacking = True
+                if pygame.time.get_ticks() - self.shooting_update_time > self.SHOOTING_COOLDOWN:
+                    self.shooting_update_time = pygame.time.get_ticks()
+                    self.attacking = True
             if self.player_is_to_the_left:
                 self.flip = False
-                self.attacking = True
+                if pygame.time.get_ticks() - self.shooting_update_time > self.SHOOTING_COOLDOWN:
+                    self.shooting_update_time = pygame.time.get_ticks()
+                    self.attacking = True
 
         
         if self.moving_left:
@@ -531,7 +538,7 @@ class Bullet(pygame.sprite.Sprite):
         self.image = pygame.Surface((3,2))
         self.image.fill((255,255,255))
         self.rect = self.image.get_rect()
-        self.BULLET_SPEED = 80
+        self.BULLET_SPEED = 200
         self.velocity = pygame.math.Vector2(0,0)
         self.velocity.x = direction * self.BULLET_SPEED
         self.x:float = spawn_pos[0]
