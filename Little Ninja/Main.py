@@ -28,6 +28,7 @@ class Game():
         self.all_bullets = pygame.sprite.Group()
         self.player_and_tiles = pygame.sprite.Group()
         self.player_group = pygame.sprite.GroupSingle()
+        self.attack_sprite = pygame.sprite.GroupSingle()
         map = Map(self.LEVELS[level])
         self.camera = Camera(WINDOW_WIDTH, WINDOW_HEIGHT, map, self, DISPLAY_SIZE)
         self.setup_level(map.data,map.pixelWidth)
@@ -64,6 +65,9 @@ class Game():
                 if event.key in [K_SPACE, K_UP]:
                         self.player.Jkey_pressed = True
                         self.player.jump(self.player.canJump())
+                if event.key == pygame.K_f:
+                    if self.player.attack != True:
+                        self.player.attack = True
                     
 
                 if event.key == pygame.K_BACKSLASH:
@@ -76,6 +80,8 @@ class Game():
                     self.player.moving_left = False
                 if event.key in [K_SPACE, K_UP]:
                     self.player.Jkey_pressed = False
+                #if event.key == pygame.K_f:
+                #    self.player.attack = False
                 
     
     #updates all the game's logic(SE)
@@ -89,12 +95,12 @@ class Game():
     def update_sprites(self):
         for sprite in self.player_and_tiles:
             sprite.update(self.camera.frame.x, self.camera.frame.right)
+
+        self.attack_sprite.update()
         
         for enemy in self.all_enemies:
             enemy.update()
-            bullet = enemy.attack()
-            if bullet != None:
-                self.all_bullets.add(bullet)
+            enemy.attack()
         
         for bullet in self.all_bullets:
             bullet.update()
@@ -117,9 +123,12 @@ class Game():
         
         pygame.display.update()
     
+    #Draws all sprites(SE)
     def draw_sprites(self):
         for sprite in self.all_sprites:
             sprite.draw(self.display)
+        if self.player.attack and self.debug_on:
+            self.attack_sprite.draw(self.display)
 
     # Blit's background layers to the display surface(SE)
     def show_background(self):

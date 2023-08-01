@@ -16,7 +16,7 @@ class Player(pygame.sprite.Sprite):
         self.image = self.animation_list[self.action][self.index]
         self.rect = pygame.Rect((0,0), (13, 16))
         self.flip = False
-        self.PLAYER_ANIMATION_COOLDOWN = 125
+        self.PLAYER_ANIMATION_COOLDOWN = [80,50,125,70]
         self.update_time = pygame.time.get_ticks()
         
         #Player Movement attributes
@@ -41,6 +41,9 @@ class Player(pygame.sprite.Sprite):
         # Other player attributes
         self.map_width = map_width
         self.dead = False
+        self.attack = False
+        self.attacking = False
+        self.attack_sprite_object = None
 
         self.x = spawn_pos[0] * TILE_SIZE
         self.y = spawn_pos[1] * TILE_SIZE
@@ -48,6 +51,7 @@ class Player(pygame.sprite.Sprite):
 
     #Updates player logic every frame(SE)
     def update(self, frame_x:int, frame_right:int):
+        #print(self.attack)
         self.Jump_Queue()
         self.get_input()
         self.apply_gravity()
@@ -57,6 +61,7 @@ class Player(pygame.sprite.Sprite):
         self.coyote_time()
         self.jump_buffer()
         self.update_animation()
+        self.perform_attack()
         
         
     #Moves the player to the coordinates  the velocity vector points at(SE)
@@ -111,6 +116,13 @@ class Player(pygame.sprite.Sprite):
 
             self.check_not_on_ground()
 
+    def perform_attack(self):
+        if self.attack and self.flip:
+            return AttackSprite(self.game, "left")
+            
+        if self.attack and not self.flip:
+            return AttackSprite(self.game, "right")
+            
 
     #Checks if the player is no longer on the ground(SE)
     #ply not on ground <-->  14.8 < velocity.y or velocity.y < 0 (because of velocity bug)
@@ -206,27 +218,36 @@ class Player(pygame.sprite.Sprite):
     #Handles animation logic (SE)
     #Changing animation frame & reseting animation when it's done 
     # & changing the  animation depending on the action
+    #Also changes the attacking variable so that the program can know if the attack animation is still playing
     def update_animation(self):
         
         # update img depending on current frame
         self.image = self.animation_list[self.action][self.index]
 
         # check if enough time has passed since the last update
-        if pygame.time.get_ticks() - self.update_time > self.PLAYER_ANIMATION_COOLDOWN:
+        if pygame.time.get_ticks() - self.update_time > self.PLAYER_ANIMATION_COOLDOWN[self.action]:
             self.update_time = pygame.time.get_ticks()
             self.index += 1
 
             # if the animation has run out , reset back to the start
             if self.index >= len(self.animation_list[self.action]):
                 self.index = 0
+                if self.action == 3:#when the attack animations stops the 'attack' variable needs to be set to False again
+                    self.attack = False
+
 
         #Changes action
         if not self.dead:
             if self.velocity.y < 0:
+                self.attack = False
                 self.update_action(2)  # 2:Jump
 
             elif self.moving_right or self.moving_left:
+                self.attack = False
                 self.update_action(1)  # 1:run
+            
+            elif self.attack:
+                self.update_action(3)   #3:attack
 
             else:
                 self.update_action(0)  # 0:idle
@@ -421,10 +442,6 @@ class Enemy(pygame.sprite.Sprite):
                     self.x = hits[0].rect.left - self.rect.width
                 if self.velocity.x < 0:#Moving to the left when collided
                     self.x = hits[0].rect.right
-                if self.velocity.x == 0 and self.rect.right >= self.TRESHOLD_B:#When moving to the right and beyond treshold B
-                    self.x = hits[0].rect.left - self.rect.width 
-                if self.velocity.x == 0 and self.rect.left <= self.TRESHOLD_A:#When moving to the left and beyond treshold A
-                    self.x = hits[0].rect.right
                 self.velocity.x = 0
                 self.rect.x = self.x 
         if dir == 'y':
@@ -501,7 +518,7 @@ class Enemy(pygame.sprite.Sprite):
             self.anim_index = 0
             self.update_time = self.game.dt
 
-
+    #Loads the enemy assets(SE)
     def load_enemy_assets(self):
         animation_list = []
         for animation in self.ANIMATION_TYPES:
@@ -544,17 +561,51 @@ class Bullet(pygame.sprite.Sprite):
         self.x:float = spawn_pos[0]
         self.y:float = spawn_pos[1]
 
-
+    #Updates the bullet Logic
     def update(self):
         self.x += self.velocity.x * self.game.dt + self.game.camera.scroll_amount
         self.rect.x = round(self.x)
         self.rect.y = self.y
         self.check_for_collision()
-
+    
+    #Removes the bullet from all sprite groups the bullet is part of if the bullet collides with the player, a tile,
+    #or if the player's attack sprite hits the bullet(SE) 
     def check_for_collision(self):
         hits = pygame.sprite.spritecollideany(self,self.game.player_and_tiles)
-        if hits:
+        attack_hits = pygame.sprite.spritecollideany(self,self.game.attack_sprite)
+        if hits or attack_hits:
             self.kill()
     
     def draw(self,display):
         display.blit(self.image,(self.rect.x,self.rect.y ))
+
+class AttackSprite(pygame.sprite.Sprite):
+    def __init__(self, game_attributes, direction:str):
+        self.groups = game_attributes.attack_sprite
+        #The class constructor (__init__ method) takes an argument of a Group (or list of Groups) the Sprite instance should belong to.
+        pygame.sprite.Sprite.__init__(self,self.groups)
+        self.game = game_attributes
+        self.image = pygame.Surface((5,10))
+        self.image.fill((0,255,0))
+        self.dir = direction
+        self.rect = self.set_rect_direction(direction)
+    
+    #Sets the direction in which the attack rect is gonna spawn(left or right)
+    #-> param dir a String that indicates a direction ("left" or "right")
+    #-> returns a Rect object thats either gonna be to the left or the right of the player depending on the direction
+    def set_rect_direction(self,dir):
+        if dir == "left":
+            return self.image.get_rect(right = self.game.player.rect.left)
+        elif dir == "right":
+            return self.image.get_rect(left = self.game.player.rect.right)
+    
+    #Updates the attackSprite Logic(SE)
+    def update(self):
+        if self.dir == "left":
+            self.rect.right = self.game.player.rect.left
+        elif self.dir == "right":
+            self.rect.left = self.game.player.rect.right
+        self.rect.y = self.game.player.rect.y
+
+        if not self.game.player.attack:
+            self.kill()
