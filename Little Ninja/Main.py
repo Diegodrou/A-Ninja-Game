@@ -22,6 +22,7 @@ class Game():
     
     #Start a new game(SE)
     def new_game(self,level:int):
+        #All sprite Groups
         self.all_sprites = pygame.sprite.Group()
         self.all_tiles = pygame.sprite.Group()
         self.all_enemies = pygame.sprite.Group()
@@ -29,6 +30,14 @@ class Game():
         self.player_and_tiles = pygame.sprite.Group()
         self.player_group = pygame.sprite.GroupSingle()
         self.attack_sprite = pygame.sprite.GroupSingle()
+        #Pause menu stuff
+        self.game_pause:bool = False
+        self.quit_b_pause:Boton = Boton(270, 180, self.ASSETS["BOTONES_IMGS"][1], 0.5)
+        PAUSE_STRING = "PAUSED"
+        self.font_pause = pygame.font.SysFont('Arial', 60)
+        self.PAUSE_TEXT = self.font_pause.render(PAUSE_STRING, 1, pygame.Color('Red'))
+        
+        #More game setup stuff
         map = Map(self.LEVELS[level])
         self.camera = Camera(WINDOW_WIDTH, WINDOW_HEIGHT, map, self, DISPLAY_SIZE)
         self.setup_level(map.data,map.pixelWidth)
@@ -57,7 +66,12 @@ class Game():
                     self.playing = False
                 self.running = False
 
-            if event.type == pygame.KEYDOWN:    
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    if self.game_pause:
+                        self.game_pause = False
+                    else:
+                        self.game_pause = True
                 if event.key == pygame.K_RIGHT:
                         self.player.moving_right = True
                 if event.key == pygame.K_LEFT:
@@ -80,8 +94,7 @@ class Game():
                     self.player.moving_left = False
                 if event.key in [K_SPACE, K_UP]:
                     self.player.Jkey_pressed = False
-                #if event.key == pygame.K_f:
-                #    self.player.attack = False
+
                 
     
     #updates all the game's logic(SE)
@@ -90,6 +103,8 @@ class Game():
         self.update_sprites()
         self.camera.update(self.player)
         self.update_bg_layers_positions()
+        self.pause_screen_logic()
+
         
     #Updates all the sprites logic(SE)
     def update_sprites(self):
@@ -121,6 +136,8 @@ class Game():
         if self.debug_on:
             self.debug()
         
+        self.pause_screen_draw()
+
         pygame.display.update()
     
     #Draws all sprites(SE)
@@ -220,9 +237,20 @@ class Game():
                     anim_index += 1    
             
 
-
-    def pause_screen(self):
-        pass
+    #Draw's the entire pause screen(SE)
+    def pause_screen_draw(self):
+        if self.game_pause:
+            pygame.draw.rect(self.window, (255, 120, 219),
+                             pygame.Rect(150, 30, 300, 300), 0, 3)
+            
+            self.window.blit(self.PAUSE_TEXT,(230,10))
+            
+            self.quit_b_pause.draw(self.window)
+    
+    #Updates the logic of all the buttons that appear in the pause menu(SE) 
+    def pause_screen_logic(self):
+        if self.quit_b_pause.check_click():
+            self.playing = False
 
     def death_screen(self):
         pass
