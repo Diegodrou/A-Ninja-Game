@@ -32,7 +32,7 @@ class Game():
         self.attack_sprite = pygame.sprite.GroupSingle()
         #Pause menu stuff
         self.game_pause:bool = False
-        self.quit_b_pause:Boton = Boton(270, 180, self.ASSETS["BOTONES_IMGS"][1], 0.5)
+        self.quit_b_pause:Boton = Boton(270, 180, self.ASSETS["BOTONES_IMGS"][2], 0.5)
         PAUSE_STRING = "PAUSED"
         self.font_pause = pygame.font.SysFont('Arial', 60)
         self.PAUSE_TEXT = self.font_pause.render(PAUSE_STRING, 1, pygame.Color('Red'))
@@ -100,9 +100,10 @@ class Game():
     #updates all the game's logic(SE)
     def update(self):
         #Game Loop: - Update
-        self.update_sprites()
-        self.camera.update(self.player)
-        self.update_bg_layers_positions()
+        if not self.game_pause:
+            self.update_sprites()
+            self.camera.update(self.player)
+            self.update_bg_layers_positions()
         self.pause_screen_logic()
 
         
@@ -201,7 +202,7 @@ class Game():
         update_time_m = self.get_time()
 
         #Intances de botones
-        level_1_b:Boton = Boton(10,10,BOTONES_IMGS[0],0.5)
+        play_b:Boton = Boton(10,120,BOTONES_IMGS[0],0.5)
 
 
         # Menu_Loop
@@ -213,17 +214,19 @@ class Game():
                     exit()
 
             #All Updates
-            if level_1_b.check_click() :
-                return 1
+            if play_b.check_click() :
+                return self.level_selection_menu()
 
 
 
             # All Draws
             self.display.blit(pygame.transform.scale(BACKGROUND_ANIM[anim_index], DISPLAY_SIZE), (0, 0))
+
+            self.display.blit(self.GAME_TITLE_IMG,(5,5))
             
             self.window.blit(pygame.transform.scale(self.display, WINDOW_SIZE), (0, 0))
             
-            level_1_b.draw(self.window)
+            play_b.draw(self.window)
             
             
             pygame.display.update()
@@ -235,7 +238,53 @@ class Game():
                     anim_index = 0
                 else:
                     anim_index += 1    
+    
+    #Menu where the player chooses the level he wants to play(SE)
+    # -> returns an interger that represents the level that will be loaded     
+    def level_selection_menu(self):
+        game_menu:bool = True
+        anim_index:int = 0
+        BACKGROUND_ANIM:list[pygame.Surface] = self.ASSETS["MENU_FRAMES"]
+        BOTONES_IMGS:list[pygame.Surface] = self.ASSETS["BOTONES_IMGS"]
+        MAIN_MENU_ANIM_COOLDOWN:float =0.09
+        update_time_m = self.get_time()
+
+        #Intances de botones
+        LEVEL_1:Boton = Boton(215,10,BOTONES_IMGS[1],0.5)
+
+
+        # Menu_Loop
+        while game_menu:
+            #Events: Pygame input
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+
+            #All Updates
+            if LEVEL_1.check_click() :
+                return 1
             
+            # All Draws
+            self.display.blit(pygame.transform.scale(BACKGROUND_ANIM[anim_index], DISPLAY_SIZE), (0, 0))
+
+            self.display.blit(self.GAME_TITLE_IMG,(5,5))
+            
+            self.window.blit(pygame.transform.scale(self.display, WINDOW_SIZE), (0, 0))
+            
+            LEVEL_1.draw(self.window)
+            
+            
+            pygame.display.update()
+            self.clock.tick(fps)
+            
+            if (self.get_time() - update_time_m > MAIN_MENU_ANIM_COOLDOWN):
+                update_time_m = self.get_time()
+                if anim_index >= len(BACKGROUND_ANIM)-1:  # 24 frames in the animation
+                    anim_index = 0
+                else:
+                    anim_index += 1 
+
 
     #Draw's the entire pause screen(SE)
     def pause_screen_draw(self):
@@ -373,8 +422,7 @@ class Game():
         nb_menu_frames = len(os.listdir(f"images/menu_imgs"))
         nb_botones = len(os.listdir(f"images/botones"))
         nb_tiles = len(os.listdir(f"images/tiles"))
-        
-        
+        self.GAME_TITLE_IMG = pygame.image.load(f"images/GameTitleAttempt2.png")
 
         #Loads bg_frames
         for i in range(self.nb_bg_layers):
@@ -426,8 +474,8 @@ class Game():
                 lvls.append(lvl)
         
         return lvls
-
-    def setup_level(self,map_layout,map_width):
+    #Setups all the sprites of the level
+    def setup_level(self,map_layout:list[list],map_width:int):
         for row,tiles in enumerate(map_layout):
             for col, tile in enumerate(tiles):
                 if tile == 0:
