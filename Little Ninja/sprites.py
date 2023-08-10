@@ -555,7 +555,7 @@ class Bullet(pygame.sprite.Sprite):
         self.image = pygame.Surface((3,2))
         self.image.fill((255,255,255))
         self.rect = self.image.get_rect()
-        self.BULLET_SPEED = 200
+        self.BULLET_SPEED = 300
         self.velocity = pygame.math.Vector2(0,0)
         self.velocity.x = direction * self.BULLET_SPEED
         self.x:float = spawn_pos[0]

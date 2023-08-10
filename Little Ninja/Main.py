@@ -32,7 +32,7 @@ class Game():
         self.attack_sprite = pygame.sprite.GroupSingle()
         #Pause menu stuff
         self.game_pause:bool = False
-        self.quit_b_pause:Boton = Boton(270, 180, self.ASSETS["BOTONES_IMGS"][2], 0.5)
+        self.quit_b_pause:Boton = Boton(270, 180, self.ASSETS["BOTONES_IMGS"][6], 0.5)
         PAUSE_STRING = "PAUSED"
         self.font_pause = pygame.font.SysFont('Arial', 60)
         self.PAUSE_TEXT = self.font_pause.render(PAUSE_STRING, 1, pygame.Color('Red'))
@@ -250,8 +250,11 @@ class Game():
         update_time_m = self.get_time()
 
         #Intances de botones
-        LEVEL_1:Boton = Boton(215,10,BOTONES_IMGS[1],0.5)
-
+        LEVEL_1:Boton = Boton(211,10,BOTONES_IMGS[1], 0.5)
+        LEVEL_2:Boton = Boton(307, 10, BOTONES_IMGS[2], 0.5)
+        LEVEL_3:Boton = Boton(403,10,BOTONES_IMGS[3], 0.5)
+        LEVEL_4:Boton = Boton(500,10,BOTONES_IMGS[4], 0.5)
+        LEVEL_5:Boton = Boton(211, 60, BOTONES_IMGS[5], 0.5)
 
         # Menu_Loop
         while game_menu:
@@ -264,6 +267,15 @@ class Game():
             #All Updates
             if LEVEL_1.check_click() :
                 return 1
+            if LEVEL_2.check_click():
+                return 2
+            if LEVEL_3.check_click():
+                return 3
+            if LEVEL_4.check_click():
+                return 4
+            if LEVEL_5.check_click():
+                return 5
+            
             
             # All Draws
             self.display.blit(pygame.transform.scale(BACKGROUND_ANIM[anim_index], DISPLAY_SIZE), (0, 0))
@@ -273,6 +285,10 @@ class Game():
             self.window.blit(pygame.transform.scale(self.display, WINDOW_SIZE), (0, 0))
             
             LEVEL_1.draw(self.window)
+            LEVEL_2.draw(self.window)
+            LEVEL_3.draw(self.window)
+            LEVEL_4.draw(self.window)
+            LEVEL_5.draw(self.window)
             
             
             pygame.display.update()

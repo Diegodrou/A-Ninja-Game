@@ -22,8 +22,9 @@ class Camera:
     
     #Adds the scroll_value to the x cordinate of  every tile of the map(SE)
     def apply_scroll(self):
+        #print(round(self.scroll_amount))
         for tile in self.game.all_tiles:
-            tile.rect.x += self.game.camera.scroll_amount
+            tile.rect.x += self.scroll_amount
     
     #Updates the camera logic(SE)
     def update(self, target):
@@ -58,18 +59,18 @@ class Camera:
             self.scroll_amount = 0
             if self.locked_A:
                 if self.check_if_on_treshold_B(target):
-                    self.scroll_amount = self.game.ceiling(self.CAMERA_SCROLL * self.game.dt)
+                    self.scroll_amount = self.CAMERA_SCROLL * self.game.dt
                     self.scrolling_to_end()
                     self.frame.x += self.scroll_amount
                     self.scroll_amount = -(self.scroll_amount)
             if self.locked_B:
                 if self.check_if_on_treshold_A(target):
-                    self.scroll_amount = self.game.ceiling( self.CAMERA_SCROLL * self.game.dt)
+                    self.scroll_amount = self.CAMERA_SCROLL * self.game.dt
                     self.scrolling_to_start()
                     self.frame.x -= self.scroll_amount
                 
         else:
-            self.scroll_amount = self.game.ceiling(self.CAMERA_SCROLL * self.game.dt)
+            self.scroll_amount = self.CAMERA_SCROLL * self.game.dt
             on_trA = self.check_if_on_treshold_A(target)
             on_trB = self.check_if_on_treshold_B(target)
             if on_trA:
