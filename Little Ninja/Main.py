@@ -143,8 +143,22 @@ class Game():
     
     #Draws all sprites(SE)
     def draw_sprites(self):
-        for sprite in self.all_sprites:
-            sprite.draw(self.display)
+        #for sprite in self.all_sprites:
+        #    sprite.draw(self.display)
+        
+        for tile in self.all_tiles:
+            tile.draw(self.display)
+
+        for enemy in self.all_enemies:
+            enemy.draw(self.display)
+        
+        for bullet in self.all_bullets:
+            bullet.draw(self.display)
+
+        for player in self.player_group:
+            player.draw(self.display)
+
+
         if self.player.attack and self.debug_on:
             self.attack_sprite.draw(self.display)
 

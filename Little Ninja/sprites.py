@@ -62,8 +62,16 @@ class Player(pygame.sprite.Sprite):
         self.jump_buffer()
         self.update_animation()
         self.perform_attack()
-        
-        
+        self.check_dead()
+        if self.dead:
+            self.kill()
+
+    #Checks if the player is dead(SE)
+    def check_dead(self):
+        if self.rect.top > DISPLAY_SIZE[1]:# if the player falls
+            self.dead = True
+
+
     #Moves the player to the coordinates  the velocity vector points at(SE)
     def move(self):
         self.x += self.velocity.x * self.game.dt
@@ -381,7 +389,7 @@ class Enemy(pygame.sprite.Sprite):
                 self.move_right()
             if self.enemy_clock > 2.5 and self.enemy_clock < 3:# moving left
                 self.move_left()
-        if self.state == self.ENEMY_STATES[1]:#attacking
+        if self.state == self.ENEMY_STATES[1] and not self.game.player.dead:#attacking
             self.stay_still()
             if self.player_is_to_the_right:
                 self.flip = True
@@ -526,7 +534,7 @@ class Enemy(pygame.sprite.Sprite):
             
             num_of_frames = len(os.listdir(f'images/enemy_imgs/{animation}'))
             for i in range(num_of_frames):
-                e_img = pygame.transform.scale_by(pygame.image.load(os.path.join("images", "enemy_imgs", animation, f'{i}.png')),1.5)
+                e_img = pygame.transform.scale_by(pygame.image.load(os.path.join("images", "enemy_imgs", animation, f'{i}.png')),1.35)
                 temp_list.append(e_img)
             animation_list.append(temp_list)
         return animation_list
@@ -571,10 +579,13 @@ class Bullet(pygame.sprite.Sprite):
     #Removes the bullet from all sprite groups the bullet is part of if the bullet collides with the player, a tile,
     #or if the player's attack sprite hits the bullet(SE) 
     def check_for_collision(self):
-        hits = pygame.sprite.spritecollideany(self,self.game.player_and_tiles)
+        hits = pygame.sprite.spritecollideany(self,self.game.all_tiles)
         attack_hits = pygame.sprite.spritecollideany(self,self.game.attack_sprite)
+        player_hit = pygame.sprite.spritecollideany(self,self.game.player_group)
         if hits or attack_hits:
             self.kill()
+        if player_hit:
+            self.game.player.dead = True
     
     def draw(self,display):
         display.blit(self.image,(self.rect.x,self.rect.y ))
