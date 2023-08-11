@@ -104,6 +104,7 @@ class Game():
             self.update_sprites()
             self.camera.update(self.player)
             self.update_bg_layers_positions()
+    
         self.pause_screen_logic()
 
         
@@ -328,8 +329,9 @@ class Game():
     
     #Updates the logic of all the buttons that appear in the pause menu(SE) 
     def pause_screen_logic(self):
-        if self.quit_b_pause.check_click():
-            self.playing = False
+        if self.game_pause:
+            if self.quit_b_pause.check_click():
+                self.playing = False
 
     def death_screen(self):
         pass
