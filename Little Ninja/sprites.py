@@ -306,18 +306,19 @@ class Enemy(pygame.sprite.Sprite):
         self.game = game_attributes
         
         #Enemy animtion stuff
-        self.ANIMATION_TYPES:list[str] = ["idle","run"]
+        self.ANIMATION_TYPES:list[str] = ["idle","run","react"]
         self.ENEMY_STATES :list[str] = ["idle", "attacking"]
         self.animation_list = self.load_enemy_assets()
         self.anim_index = 0
         self.anim_action = 0 
         self.image = self.animation_list[self.anim_action][self.anim_index]
-        self.rect = pygame.Rect((100,0), (13, 16))#100 to fix a bullet spawning bug
+        self.rect = pygame.Rect((1000,0), (18, 24))#100 to fix a bullet spawning bug
         self.flip = False
         self.ENEMY_ANIMATION_COOLDOWN = 125
         self.SHOOTING_COOLDOWN = 230
         self.update_time = pygame.time.get_ticks()
         self.shooting_update_time = pygame.time.get_ticks()
+        self.REACTION_COOLDOWN = 250
 
         #Enemy movement stuff
         self.velocity  = pygame.math.Vector2(0,0) 
@@ -325,17 +326,20 @@ class Enemy(pygame.sprite.Sprite):
         self.moving_right = False
         self.moving_left = False
         self.gravity = 830
-        self.enemy_clock = 0
+        self.enemy_clock_1 = 0
+        self.enemy_clock_2 = 0
         self.on_ground = True
         self.jumping = False
 
         # Other player attributes
         self.dead = False
         self.VISION_RANGE = 100
-        self.state:str = self.ENEMY_STATES[0]
+        self.animation_state:str = self.ANIMATION_TYPES[0]
+        self.logic_state :str = self.ENEMY_STATES[0]
         self.player_is_to_the_right = False
         self.player_is_to_the_left = False
         self.attacking = False
+        self.first_attack = True
 
         self.x = spawn_pos[0] * TILE_SIZE
         self.y = spawn_pos[1] * TILE_SIZE
@@ -346,24 +350,27 @@ class Enemy(pygame.sprite.Sprite):
         self.apply_gravity()
         self.move_enemy()
         self.update_animation()
-        self.enemy_clock += 1 * self.game.dt
-        if self.enemy_clock >= 3:
-            self.enemy_clock = 0
-        
+        self.enemy_clock_1 += 1 * self.game.dt
+        if self.enemy_clock_1 >= 3:
+            self.enemy_clock_1 = 0
+
         
     #Determines whether if  the enemy is idle or attacking the player(SE)
     def decide_enemy_state(self):
         if self.player_in_range():
-            self.state = self.ENEMY_STATES[1]
+            self.logic_state = self.ENEMY_STATES[1]
         else:
-            self.state = self.ENEMY_STATES[0]
+            self.logic_state = self.ENEMY_STATES[0]
+            if self.enemy_clock_2 >= 1:# if the player gets out of the enemy vision range before the cooldown is done
+                self.first_attack = False#the animation will stop playing
         
     #Checks if the player is inside the range of vision of the enemy
     def player_in_range(self):
         player_rect_left = (self.game.player.rect.left <= self.rect.centerx + self.VISION_RANGE) and (self.game.player.rect.left >= self.rect.centerx - self.VISION_RANGE)
         player_rect_right = (self.game.player.rect.right >= self.rect.centerx - self.VISION_RANGE) and (self.game.player.rect.right <= self.rect.centerx + self.VISION_RANGE)
         player_rect_bottom = self.game.player.rect.bottom >= self.rect.top
-    
+
+
         player_in_range_bool = (player_rect_left or player_rect_right) and player_rect_bottom
         if player_in_range_bool:
             return True
@@ -381,26 +388,19 @@ class Enemy(pygame.sprite.Sprite):
         self.decide_enemy_state()
         self.player_is_to_the_right = self.game.player.rect.right >= self.rect.centerx #True if player is to the right of the enemy
         self.player_is_to_the_left =  self.game.player.rect.right <= self.rect.centerx #True if player is to the left of the enemy
-        
-        if self.state == self.ENEMY_STATES[0]:#idle:
-            if self.enemy_clock < 2:#standing still
+
+        if self.logic_state == self.ENEMY_STATES[0]:#idle:
+            if self.enemy_clock_1 < 2:#standing still
                 self.stay_still()
-            if self.enemy_clock > 2 and self.enemy_clock < 2.5:# moving right
+            if self.enemy_clock_1 > 2 and self.enemy_clock_1 < 2.5:# moving right
                 self.move_right()
-            if self.enemy_clock > 2.5 and self.enemy_clock < 3:# moving left
+            if self.enemy_clock_1 > 2.5 and self.enemy_clock_1 < 3:# moving left
                 self.move_left()
-        if self.state == self.ENEMY_STATES[1] and not self.game.player.dead:#attacking
-            self.stay_still()
-            if self.player_is_to_the_right:
-                self.flip = True
-                if pygame.time.get_ticks() - self.shooting_update_time > self.SHOOTING_COOLDOWN:
-                    self.shooting_update_time = pygame.time.get_ticks()
-                    self.attacking = True
-            if self.player_is_to_the_left:
-                self.flip = False
-                if pygame.time.get_ticks() - self.shooting_update_time > self.SHOOTING_COOLDOWN:
-                    self.shooting_update_time = pygame.time.get_ticks()
-                    self.attacking = True
+        if self.logic_state == self.ENEMY_STATES[1] and not self.game.player.dead:#attacking
+            if self.first_attack:
+                self.reaction()
+            else:
+                self.attacking_func()
 
         
         if self.moving_left:
@@ -418,17 +418,25 @@ class Enemy(pygame.sprite.Sprite):
     def stay_still(self):
         self.moving_left = False
         self.moving_right = False
+        self.animation_state = self.ANIMATION_TYPES[0]# idle
     
     #Makes the enemy move to the right(SE)
     #This fucntion should be used inside the enemy_AI function
     def move_right(self):
         self.moving_right = True
         self.moving_left = False
+        self.animation_state = self.ANIMATION_TYPES[1] # run
     #Makes the enemy move to the left(SE)
     #This fucntion should be used inside the enemy_AI function
     def move_left(self):
         self.moving_left = True
         self.moving_right = False
+        self.animation_state = self.ANIMATION_TYPES[1] # run
+
+    def react(self):
+        self.moving_left = False
+        self.moving_right = False
+        self.animation_state = self.ANIMATION_TYPES[2]
     
     #Moves the enemy to the coordinates  the velocity vector points at(SE)
     def move_enemy(self):
@@ -484,6 +492,35 @@ class Enemy(pygame.sprite.Sprite):
                 return Bullet(self.game, self.rect.midright,1)
             else:
                 return None
+    
+    def attacking_func(self):
+        self.stay_still()
+        if self.player_is_to_the_right:
+            self.flip = True
+            if pygame.time.get_ticks() - self.shooting_update_time > self.SHOOTING_COOLDOWN:
+                self.shooting_update_time = pygame.time.get_ticks()
+                self.attacking = True
+        if self.player_is_to_the_left:
+            self.flip = False
+            if pygame.time.get_ticks() - self.shooting_update_time > self.SHOOTING_COOLDOWN:
+                self.shooting_update_time = pygame.time.get_ticks()
+                self.attacking = True
+
+    def reaction(self):
+
+        if self.enemy_clock_2 < 1:
+            self.reaction_update_time = pygame.time.get_ticks()
+            self.enemy_clock_2 += 1
+            
+        self.react()
+        if self.player_is_to_the_right:
+            self.flip = True
+
+        if self.player_is_to_the_left:
+            self.flip = False
+
+        
+
 
     def draw(self, display:pygame.Surface):
         display.blit(pygame.transform.flip(self.image,self.flip,False), (self.rect.x,self.rect.y))
@@ -510,11 +547,15 @@ class Enemy(pygame.sprite.Sprite):
 
         #Changes action
         if not self.dead:
-            if self.state == self.ANIMATION_TYPES[1]:
+            if self.animation_state == self.ANIMATION_TYPES[1]:
                 self.update_action(1)  # 1:run
 
-            else:
+            elif self.animation_state == self.ANIMATION_TYPES[0]:
                 self.update_action(0)  # 0:idle
+            elif self.animation_state == self.ANIMATION_TYPES[2]:
+                self.update_action(2) # 2:reaction
+                if (pygame.time.get_ticks() - self.reaction_update_time > self.REACTION_COOLDOWN):
+                    self.first_attack = False
 
     #Changes player's current action to the next action
     def update_action(self, new_action:int):
@@ -534,7 +575,7 @@ class Enemy(pygame.sprite.Sprite):
             
             num_of_frames = len(os.listdir(f'images/enemy_imgs/{animation}'))
             for i in range(num_of_frames):
-                e_img = pygame.transform.scale_by(pygame.image.load(os.path.join("images", "enemy_imgs", animation, f'{i}.png')),1.35)
+                e_img = pygame.transform.scale_by(pygame.image.load(os.path.join("images", "enemy_imgs", animation, f'{i}.png')),1)
                 temp_list.append(e_img)
             animation_list.append(temp_list)
         return animation_list
@@ -584,7 +625,7 @@ class Bullet(pygame.sprite.Sprite):
         player_hit = pygame.sprite.spritecollideany(self,self.game.player_group)
         if hits or attack_hits:
             self.kill()
-        if player_hit:
+        if player_hit and not self.game.debug_on:
             self.game.player.dead = True
     
     def draw(self,display):
