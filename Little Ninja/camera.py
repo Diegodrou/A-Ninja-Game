@@ -22,7 +22,6 @@ class Camera:
     
     #Adds the scroll_value to the x cordinate of  every tile of the map(SE)
     def apply_scroll(self):
-        #print(round(self.scroll_amount))
         for tile in self.game.all_tiles:
             tile.rect.x += self.scroll_amount
     

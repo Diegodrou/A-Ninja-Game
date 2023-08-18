@@ -1,6 +1,6 @@
 
 #fps settings
-fps = 75
+fps = 60
 
 #window /display settings
 WINDOW_HEIGHT = 416

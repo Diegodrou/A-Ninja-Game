@@ -19,6 +19,7 @@ class Game():
         self.ASSETS = {}
         self.load_assets()
         self.LEVELS = self.load_levels()
+        self.Fps = 60
     
     #Start a new game(SE)
     def new_game(self,level:int):
@@ -54,6 +55,7 @@ class Game():
     
     #Game Loop
     def run(self):
+        
         self.playing = True
         self.prev_time = self.get_time()
         while self.playing:
@@ -63,7 +65,7 @@ class Game():
             self.events()
             self.update()
             self.draw()
-            self.clock.tick(60)
+            self.clock.tick(self.Fps)
     
     #Game Loop: - Events(SE)
     def events(self):
@@ -94,6 +96,7 @@ class Game():
 
                 if event.key == pygame.K_BACKSLASH:
                         self.debug_on = not self.debug_on
+
                         
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_RIGHT:
@@ -362,11 +365,11 @@ class Game():
         pass
     #Debug functions
     def debug(self):
-        self.camera.show_thresholds(self.window)
+        #self.camera.show_thresholds(self.window)
         self.window.blit(self.update_fps(),(10,10))
-        self.window.blit(self.show_playerMoveVector(),(10,30))
-        self.window.blit(self.show_DeltaTime(),(10,50))
-        self.window.blit(self.show_player_pos(),(10,70))
+        #self.window.blit(self.show_playerMoveVector(),(10,30))
+        #self.window.blit(self.show_DeltaTime(),(10,50))
+        #self.window.blit(self.show_player_pos(),(10,70))
         #self.window.blit(self.show_player_on_ground(),(10,100))
         #self.window.blit(self.show_player_air_timer(),(10,130))
         #self.window.blit(self.show_player_jumping_b(),(10,160))

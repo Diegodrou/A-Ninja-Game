@@ -438,7 +438,7 @@ class Enemy(pygame.sprite.Sprite):
     
     #Moves the enemy to the coordinates  the velocity vector points at(SE)
     def move_enemy(self):
-        self.x += self.velocity.x * self.game.dt + self.game.camera.scroll_amount
+        self.x += self.velocity.x * self.game.dt + self.game.camera.scroll_amount 
         self.y += self.velocity.y * self.game.dt
         self.rect.x =  round(self.x)
         self.check_collision_with_tile('x')
