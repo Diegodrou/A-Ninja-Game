@@ -11,6 +11,7 @@ class Game():
         #initialise pygame(window,mixer,clock,etc)
         self.running = True
         pygame.init()
+        pygame.mixer.init()
         pygame.display.set_caption(TITLE)
         self.window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         self.display = pygame.Surface(DISPLAY_SIZE)
@@ -91,6 +92,8 @@ class Game():
                         self.player.jump(self.player.canJump())
                 if event.key == pygame.K_f:
                     if self.player.attack != True:
+                        #self.ASSETS["SFX"][4].play()
+                        self.player.attack_performed = True
                         self.player.attack = True
                     
 
@@ -113,14 +116,31 @@ class Game():
         #Game Loop: - Update
         if not self.player.dead:
             if not self.game_pause:
+                self.enemy_sprite_count_before = self.update_enemy_sprite_count()
                 self.update_sprites()
+                self.enemy_sprite_count_after = self.update_enemy_sprite_count()
                 self.camera.update(self.player)
                 self.update_bg_layers_positions()
+                self.play_sounds()
+                
         
             self.pause_screen_logic()
         self.dead_menu_logic()
 
-        
+    def play_sounds(self):
+        if self.player.attack_performed and not self.any_enemy_dead() :
+            self.player.attack_performed = False
+            self.ASSETS["SFX"][4].play()
+        elif self.player.attack_performed and self.any_enemy_dead():
+            self.player.attack_performed = False
+            self.ASSETS["SFX"][3].play()
+    
+    def update_enemy_sprite_count(self):
+        return self.all_enemies.sprites()
+    
+    def any_enemy_dead(self):
+        if self.enemy_sprite_count_before != self.enemy_sprite_count_after:
+            return True     
     #Updates all the sprites logic(SE)
     def update_sprites(self):
         for sprite in self.player_and_tiles:
@@ -477,11 +497,13 @@ class Game():
         botones_images = []
         tiles = []
         self.layer_data = []
+        sounds = []
 
         self.nb_bg_layers = len(os.listdir(f"images/background_imgs"))
         nb_menu_frames = len(os.listdir(f"images/menu_imgs"))
         nb_botones = len(os.listdir(f"images/botones"))
         nb_tiles = len(os.listdir(f"images/tiles"))
+        nb_sounds = len(os.listdir(f"sounds"))
         self.GAME_TITLE_IMG = pygame.image.load(f"images/GameTitleAttempt2.png")
 
         #Loads bg_frames
@@ -495,9 +517,9 @@ class Game():
         max_index = self.nb_bg_layers - 1
 
         for index in range(1,max_index):
-            self.layer_data.append([0,0,0 + (index) * sub_v] )#0: X1(blit position 1) 1: X2 (blit position 2) 2:speed 3:current_treshold
+            self.layer_data.append([0,0,0 + (index) * sub_v] )#0: X1(blit position 1) 1: X2 (blit position 2) 2:speed
             
-        self.layer_data[max_index][2] = 1 - 0.09  
+        self.layer_data[max_index][2] = 1 - 0.09  #closest layer to the player
 
         #Transform frames to the right size
         for frame in temp_bg_layers:
@@ -518,11 +540,17 @@ class Game():
         for h in range(nb_tiles):
             tiles.append(pygame.image.load(f"images/tiles/{h}.png").convert())
 
+        #Load game sounds
+        #0:player_jump 1:player_walking 2:shooting 3:sword_hit_enemy 4:sword slash
+        for q in range(nb_sounds):
+            sounds.append(pygame.mixer.Sound(os.path.join("sounds",f'{q}.wav')))
+
 
         self.ASSETS["BOTONES_IMGS"] = botones_images
         self.ASSETS["MENU_FRAMES"] = menu_images
         self.ASSETS["BG_LAYERS"] = bg_layers
         self.ASSETS["TILES"] = tiles
+        self.ASSETS["SFX"] = sounds 
     
     #loods levels using pickle library  
     def load_levels(self):

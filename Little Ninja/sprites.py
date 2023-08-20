@@ -44,6 +44,7 @@ class Player(pygame.sprite.Sprite):
         self.attack = False
         self.attacking = False
         self.attack_sprite_object = None
+        self.attack_performed = False
 
         self.x = spawn_pos[0] * TILE_SIZE
         self.y = spawn_pos[1] * TILE_SIZE
@@ -86,7 +87,7 @@ class Player(pygame.sprite.Sprite):
         if self.moving_left:
             self.velocity.x = -self.speed
             self.flip = True
-
+            
         elif self.moving_right:
             self.velocity.x = self.speed
             self.flip = False   
@@ -144,6 +145,8 @@ class Player(pygame.sprite.Sprite):
         self.jumping = True
         if jump: 
             self.velocity.y = self.jump_intensity
+            if not self.dead:
+                self.game.ASSETS["SFX"][0].play()
     
     #Coyote time(SE)
     #A brief delay between an pressing the jump button and
@@ -630,6 +633,7 @@ class Bullet(pygame.sprite.Sprite):
         self.velocity.x = direction * self.BULLET_SPEED
         self.x:float = spawn_pos[0]
         self.y:float = spawn_pos[1]
+        self.game.ASSETS["SFX"][2].play()
 
     #Updates the bullet Logic
     def update(self):
@@ -662,6 +666,7 @@ class AttackSprite(pygame.sprite.Sprite):
         self.image.fill((0,255,0))
         self.dir = direction
         self.rect = self.set_rect_direction(direction)
+
     
     #Sets the direction in which the attack rect is gonna spawn(left or right)
     #-> param dir a String that indicates a direction ("left" or "right")
