@@ -17,6 +17,7 @@ class Player(pygame.sprite.Sprite):
         self.rect = pygame.Rect((0,0), (13, 16))
         self.flip = False
         self.PLAYER_ANIMATION_COOLDOWN = [80,50,125,70]
+        self.STEPS_SOUND_COOLDOWN = 200
         self.update_time = pygame.time.get_ticks()
         
         #Player Movement attributes
@@ -45,6 +46,8 @@ class Player(pygame.sprite.Sprite):
         self.attacking = False
         self.attack_sprite_object = None
         self.attack_performed = False
+        self.jump_performed = False
+        self.bullet_deflected = False
 
         self.x = spawn_pos[0] * TILE_SIZE
         self.y = spawn_pos[1] * TILE_SIZE
@@ -143,10 +146,10 @@ class Player(pygame.sprite.Sprite):
     #Makes the player jump(SE)
     def jump(self,jump):
         self.jumping = True
-        if jump: 
+        if jump:
+            self.jump_performed = True 
             self.velocity.y = self.jump_intensity
-            if not self.dead:
-                self.game.ASSETS["SFX"][0].play()
+            
     
     #Coyote time(SE)
     #A brief delay between an pressing the jump button and
@@ -183,7 +186,7 @@ class Player(pygame.sprite.Sprite):
         if self.velocity.y > 0 and self.jumping:
             self.jumping = False
 
-    #Checks the different conditions in which a player should be allowed to jump
+    #Checks the different conditions in which a player should be allowed to jump (SE)
     # -->returns True if the player can jump , False if he can't jump
     def canJump(self):
         if self.on_ground  or self.check_coyote_time():
@@ -650,6 +653,8 @@ class Bullet(pygame.sprite.Sprite):
         player_hit = pygame.sprite.spritecollideany(self,self.game.player_group)
         if hits or attack_hits:
             self.kill()
+            if attack_hits:
+                self.game.player.bullet_deflected = True
         if player_hit and not self.game.debug_on:
             self.game.player.dead = True
     

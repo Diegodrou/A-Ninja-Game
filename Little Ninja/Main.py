@@ -56,7 +56,7 @@ class Game():
     
     #Game Loop
     def run(self):
-        
+        self.update_sound_time = pygame.time.get_ticks()
         self.playing = True
         self.prev_time = self.get_time()
         while self.playing:
@@ -128,13 +128,49 @@ class Game():
         self.dead_menu_logic()
 
     def play_sounds(self):
-        if self.player.attack_performed and not self.any_enemy_dead() :
-            self.player.attack_performed = False
-            self.ASSETS["SFX"][4].play()
-        elif self.player.attack_performed and self.any_enemy_dead():
-            self.player.attack_performed = False
-            self.ASSETS["SFX"][3].play()
+        self.play_attack_sound()
+        self.play_jump_sound()
+        self.play_player_walking_sound()
+        self.play_player_dead_sound()
+        self.play_deflect_bullet_sound()
+        
+
+    def play_attack_sound(self):
+        if not (self.player.moving_left or self.player.moving_right):
+            if self.player.attack_performed and not self.any_enemy_dead() :
+                self.player.attack_performed = False
+                self.ASSETS["SFX"][4].play()
+            elif self.player.attack_performed and self.any_enemy_dead():
+                self.player.attack_performed = False
+                self.ASSETS["SFX"][3].play()
+
+    def play_jump_sound(self):
+        if self.player.jump_performed:
+            self.player.jump_performed = False
+            if not self.player.dead:
+                    self.ASSETS["SFX"][0].play()
+
+    def play_player_walking_sound(self):
+        if (pygame.time.get_ticks() - self.update_sound_time > self.player.STEPS_SOUND_COOLDOWN) and (self.player.moving_left or self.player.moving_right):
+            if self.player.on_ground:
+                self.update_sound_time = pygame.time.get_ticks()
+                self.ASSETS["SFX"][1].play()
+
+    def play_click_sound(self):
+        self.ASSETS["SFX"][6].play()
+
+    def play_player_dead_sound(self):
+        if self.player.dead:
+            self.ASSETS["SFX"][5].play()
+
+    def play_enemy_walking_sound(self):
+        pass
     
+    def play_deflect_bullet_sound(self):
+        if self.player.bullet_deflected:
+            self.player.bullet_deflected = False
+            self.ASSETS["SFX"][7].play()
+
     def update_enemy_sprite_count(self):
         return self.all_enemies.sprites()
     
@@ -264,6 +300,7 @@ class Game():
 
             #All Updates
             if play_b.check_click() :
+                self.play_click_sound()
                 return self.level_selection_menu()
 
 
@@ -315,14 +352,19 @@ class Game():
 
             #All Updates
             if LEVEL_1.check_click() :
+                self.play_click_sound()
                 return 1
             if LEVEL_2.check_click():
+                self.play_click_sound()
                 return 2
             if LEVEL_3.check_click():
+                self.play_click_sound()
                 return 3
             if LEVEL_4.check_click():
+                self.play_click_sound()
                 return 4
             if LEVEL_5.check_click():
+                self.play_click_sound()
                 return 5
             
             
@@ -352,8 +394,10 @@ class Game():
     def dead_menu_logic(self):
         if self.player.dead:
             if self.retry_b.check_click():
+                self.play_click_sound()
                 self.playing = False
             if self.quit_b_dead_menu.check_click():
+                self.play_click_sound()
                 self.playing = False
                 self.retry_game = False
 
@@ -378,6 +422,7 @@ class Game():
     def pause_screen_logic(self):
         if self.game_pause:
             if self.quit_b_pause.check_click():
+                self.play_click_sound()
                 self.playing = False
                 self.retry_game = False
 
@@ -541,7 +586,8 @@ class Game():
             tiles.append(pygame.image.load(f"images/tiles/{h}.png").convert())
 
         #Load game sounds
-        #0:player_jump 1:player_walking 2:shooting 3:sword_hit_enemy 4:sword slash
+        #0:player_jump 1:player_walking 2:shooting 3:sword_hit_enemy 4:sword slash 5: player killed sound
+        # 6:click_sound 7:deflect bullet sound 
         for q in range(nb_sounds):
             sounds.append(pygame.mixer.Sound(os.path.join("sounds",f'{q}.wav')))
 
