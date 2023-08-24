@@ -25,6 +25,8 @@ class Game():
     #Start a new game(SE)
     def new_game(self,level:int):
         self.retry_game = True
+        pygame.mixer.music.load(self.ASSETS["MUSIC_PATHS"][level])
+        pygame.mixer.music.play(loops=-1)
         while self.retry_game:
             #All sprite Groups
             self.all_sprites = pygame.sprite.Group()
@@ -47,6 +49,7 @@ class Game():
             self.DEAD_MESAGE_TXT = self.font_pause.render(self.DEAD_MESAGE_STRING, 1, pygame.Color('Red'))
             self.retry_b : Boton = Boton(270, 120, self.ASSETS["BOTONES_IMGS"][8], 0.5)
             self.quit_b_dead_menu:Boton = Boton(270, 180, self.ASSETS["BOTONES_IMGS"][6], 0.5)
+            self.retry_b_pause: Boton = Boton(270, 120, self.ASSETS["BOTONES_IMGS"][8], 0.5 )
             #More game setup stuff
             map = Map(self.LEVELS[level])
             self.camera = Camera(WINDOW_WIDTH, WINDOW_HEIGHT, map, self, DISPLAY_SIZE)
@@ -279,6 +282,8 @@ class Game():
     
     #Menu Loop
     def menu_screen(self):
+        pygame.mixer.music.load(self.ASSETS["MUSIC_PATHS"][0])
+        pygame.mixer.music.play(loops=-1)
         game_menu:bool = True
         anim_index:int = 0
         BACKGROUND_ANIM:list[pygame.Surface] = self.ASSETS["MENU_FRAMES"]
@@ -417,6 +422,7 @@ class Game():
             self.window.blit(self.PAUSE_TEXT,(230,10))
             
             self.quit_b_pause.draw(self.window)
+            self.retry_b_pause.draw(self.window)
     
     #Updates the logic of all the buttons that appear in the pause menu(SE) 
     def pause_screen_logic(self):
@@ -425,6 +431,9 @@ class Game():
                 self.play_click_sound()
                 self.playing = False
                 self.retry_game = False
+            if self.retry_b_pause.check_click():
+                self.play_click_sound()
+                self.playing = False
 
     def death_screen(self):
         pass
@@ -543,6 +552,9 @@ class Game():
         tiles = []
         self.layer_data = []
         sounds = []
+        music_names = ["01 Blossom Tree.wav","03 Himawari No Sato.wav","04 Whispering Stars.wav",
+                       "06 Tengu.wav","07 Gion District.wav","08 Higanbana Field.wav",]
+        music_paths = []
 
         self.nb_bg_layers = len(os.listdir(f"images/background_imgs"))
         nb_menu_frames = len(os.listdir(f"images/menu_imgs"))
@@ -591,12 +603,18 @@ class Game():
         for q in range(nb_sounds):
             sounds.append(pygame.mixer.Sound(os.path.join("sounds",f'{q}.wav')))
 
+        for name in music_names:
+            music_paths.append(os.path.join("music", name))
+
+        
+
 
         self.ASSETS["BOTONES_IMGS"] = botones_images
         self.ASSETS["MENU_FRAMES"] = menu_images
         self.ASSETS["BG_LAYERS"] = bg_layers
         self.ASSETS["TILES"] = tiles
         self.ASSETS["SFX"] = sounds 
+        self.ASSETS["MUSIC_PATHS"] = music_paths
     
     #loods levels using pickle library  
     def load_levels(self):

@@ -186,7 +186,7 @@ class Player(pygame.sprite.Sprite):
         if self.velocity.y > 0 and self.jumping:
             self.jumping = False
 
-    #Checks the different conditions in which a player should be allowed to jump (SE)
+    #Checks the different conditions in which a player should be allowed to jump
     # -->returns True if the player can jump , False if he can't jump
     def canJump(self):
         if self.on_ground  or self.check_coyote_time():
@@ -321,7 +321,7 @@ class Enemy(pygame.sprite.Sprite):
         self.rect = pygame.Rect((1000,0), (18, 24))#100 to fix a bullet spawning bug
         self.flip = False
         self.ENEMY_ANIMATION_COOLDOWN = 125
-        self.SHOOTING_COOLDOWN = 230
+        self.SHOOTING_COOLDOWN = 350
         self.update_time = pygame.time.get_ticks()
         self.shooting_update_time = pygame.time.get_ticks()
         self.REACTION_COOLDOWN = 250
