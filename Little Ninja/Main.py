@@ -2,7 +2,7 @@ import pygame,time,os,pickle,math
 from pygame.locals import *
 from settings import *
 from sprites import *
-from boton import Boton
+from boton import *
 from map import Map
 from camera import Camera
 
@@ -13,13 +13,15 @@ class Game():
         pygame.init()
         pygame.mixer.init()
         pygame.display.set_caption(TITLE)
-        self.window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        self.window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT),pygame.RESIZABLE)
         self.display = pygame.Surface(DISPLAY_SIZE)
         self.clock = pygame.time.Clock()
         self.debug_on = False
         self.ASSETS = {}
         self.load_assets()
         self.LEVELS = self.load_levels()
+        pygame.mixer.music.load(self.ASSETS["MUSIC_PATHS"][0])
+        pygame.mixer.music.play(loops=-1)
         self.Fps = 60
     
     #Start a new game(SE)
@@ -50,6 +52,8 @@ class Game():
             self.retry_b : Boton = Boton(270, 120, self.ASSETS["BOTONES_IMGS"][8], 0.5)
             self.quit_b_dead_menu:Boton = Boton(270, 180, self.ASSETS["BOTONES_IMGS"][6], 0.5)
             self.retry_b_pause: Boton = Boton(270, 120, self.ASSETS["BOTONES_IMGS"][8], 0.5 )
+
+
             #More game setup stuff
             map = Map(self.LEVELS[level])
             self.camera = Camera(WINDOW_WIDTH, WINDOW_HEIGHT, map, self, DISPLAY_SIZE)
@@ -282,8 +286,7 @@ class Game():
     
     #Menu Loop
     def menu_screen(self):
-        pygame.mixer.music.load(self.ASSETS["MUSIC_PATHS"][0])
-        pygame.mixer.music.play(loops=-1)
+        
         game_menu:bool = True
         anim_index:int = 0
         BACKGROUND_ANIM:list[pygame.Surface] = self.ASSETS["MENU_FRAMES"]
@@ -293,6 +296,7 @@ class Game():
 
         #Intances de botones
         play_b:Boton = Boton(10,120,BOTONES_IMGS[0],0.5)
+        option_b = Boton(10, 180, BOTONES_IMGS[10], 0.5)
 
 
         # Menu_Loop
@@ -302,13 +306,16 @@ class Game():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     exit()
+               
 
             #All Updates
             if play_b.check_click() :
                 self.play_click_sound()
                 return self.level_selection_menu()
 
-
+            if option_b.check_click():
+                self.play_click_sound()
+                return self.options_menu()
 
             # All Draws
             self.display.blit(pygame.transform.scale(BACKGROUND_ANIM[anim_index], DISPLAY_SIZE), (0, 0))
@@ -318,6 +325,7 @@ class Game():
             self.window.blit(pygame.transform.scale(self.display, WINDOW_SIZE), (0, 0))
             
             play_b.draw(self.window)
+            option_b.draw(self.window)
             
             
             pygame.display.update()
@@ -330,6 +338,69 @@ class Game():
                 else:
                     anim_index += 1    
     
+
+    def options_menu(self):
+        game_menu:bool = True
+        anim_index:int = 0
+        BACKGROUND_ANIM:list[pygame.Surface] = self.ASSETS["MENU_FRAMES"]
+        BOTONES_IMGS:list[pygame.Surface] = self.ASSETS["BOTONES_IMGS"]
+        MAIN_MENU_ANIM_COOLDOWN:float =0.09
+        update_time_m = self.get_time()
+        change = False
+
+
+        #Button instances
+        music_check_box =  CheckBox(100,120, BOTONES_IMGS[11], BOTONES_IMGS[12],True, 0.5)
+
+        #Text
+        font_1 = pygame.font.SysFont('Arial', 30)
+        MUSIC_STRING = "Music"
+        MUSIC_TXT = font_1.render(MUSIC_STRING,1,pygame.Color('Red'))
+
+        # Menu_Loop
+        while game_menu:
+            #Events: Pygame input
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+
+                #if event.type == KEYDOWN:
+                #    if event.key == K_r:
+                #        change = not change
+                #        if change:
+                #            self.window = pygame.display.set_mode((1200,736),pygame.RESIZABLE)
+                #        else:
+                #            self.window = pygame.display.set_mode(WINDOW_SIZE,pygame.RESIZABLE)
+
+            #All Updates
+            if music_check_box.check_clicked():
+                if music_check_box.state == False:
+                    pygame.mixer.music.stop()
+                else:
+                    pygame.mixer.music.play(loops = -1)
+
+            # All Draws
+            self.display.blit(pygame.transform.scale(BACKGROUND_ANIM[anim_index], DISPLAY_SIZE), (0, 0))
+
+            self.display.blit(self.GAME_TITLE_IMG,(5,5))
+            
+            self.window.blit(pygame.transform.scale(self.display, self.window.get_size()), (0, 0))
+
+            self.window.blit(MUSIC_TXT, (10, 135))
+
+            music_check_box.draw(self.window)
+
+            pygame.display.update()
+            self.clock.tick(fps)
+            
+            if (self.get_time() - update_time_m > MAIN_MENU_ANIM_COOLDOWN):
+                update_time_m = self.get_time()
+                if anim_index >= len(BACKGROUND_ANIM)-1:  # 24 frames in the animation
+                    anim_index = 0
+                else:
+                    anim_index += 1 
+
     #Menu where the player chooses the level he wants to play(SE)
     # -> returns an interger that represents the level that will be loaded     
     def level_selection_menu(self):
