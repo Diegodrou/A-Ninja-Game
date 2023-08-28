@@ -13,7 +13,13 @@ class Game():
         pygame.init()
         pygame.mixer.init()
         pygame.display.set_caption(TITLE)
-        self.window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT),pygame.RESIZABLE)
+        self.MONITOR_RESOLUTION = (pygame.display.Info().current_w, pygame.display.Info().current_h)
+        self.get_resolutions()
+        self.selected_resolution = 1
+        self.res_scale = 1
+        self.prev_res_scale = self.res_scale
+        self.window = pygame.display.set_mode((self.RESOLUTIONS[self.selected_resolution][0], 
+                                               self.RESOLUTIONS[self.selected_resolution][1]),pygame.RESIZABLE)
         self.display = pygame.Surface(DISPLAY_SIZE)
         self.clock = pygame.time.Clock()
         self.debug_on = False
@@ -209,7 +215,7 @@ class Game():
         
         
         #Things drawn in the window
-        self.window.blit(pygame.transform.scale(self.display, WINDOW_SIZE), (0, 0))
+        self.window.blit(pygame.transform.scale(self.display, self.window.get_size()), (0, 0))
         
         if self.debug_on:
             self.debug()
@@ -295,8 +301,8 @@ class Game():
         update_time_m = self.get_time()
 
         #Intances de botones
-        play_b:Boton = Boton(10,120,BOTONES_IMGS[0],0.5)
-        option_b = Boton(10, 180, BOTONES_IMGS[10], 0.5)
+        self.play_b:Boton = Boton(10,120,BOTONES_IMGS[0],0.5)
+        self.option_b = Boton(10, 180, BOTONES_IMGS[10], 0.5)
 
 
         # Menu_Loop
@@ -309,23 +315,23 @@ class Game():
                
 
             #All Updates
-            if play_b.check_click() :
+            if self.play_b.check_click() :
                 self.play_click_sound()
                 return self.level_selection_menu()
 
-            if option_b.check_click():
+            if self.option_b.check_click():
                 self.play_click_sound()
-                return self.options_menu()
+                self.options_menu()
 
             # All Draws
             self.display.blit(pygame.transform.scale(BACKGROUND_ANIM[anim_index], DISPLAY_SIZE), (0, 0))
 
             self.display.blit(self.GAME_TITLE_IMG,(5,5))
             
-            self.window.blit(pygame.transform.scale(self.display, WINDOW_SIZE), (0, 0))
+            self.window.blit(pygame.transform.scale(self.display, self.window.get_size()), (0, 0))
             
-            play_b.draw(self.window)
-            option_b.draw(self.window)
+            self.play_b.draw(self.window,10 * self.res_scale ,120 * self.res_scale, 0.5 * self.res_scale)
+            self.option_b.draw(self.window,10 * self.res_scale, self.res_scale * 180,self.res_scale * 0.5)
             
             
             pygame.display.update()
@@ -338,7 +344,32 @@ class Game():
                 else:
                     anim_index += 1    
     
+    def change_scale(self):
+        for resolution in range(len(self.RESOLUTIONS)):
+            if self.selected_resolution == resolution:
+                self.res_scale = self.resolution_scales[resolution]
+    
+    def update_text(self):
+        self.font_1 = pygame.font.SysFont('Arial', int(30 * self.res_scale))
+        self.resolution_string =  str(self.window.get_size()[0])+" x "+str(self.window.get_size()[1])
+        self.resolution_txt = self.font_1.render(self.resolution_string,1,pygame.Color('Red'))
+        self.music_txt = self.font_1.render(self.music_string,1,pygame.Color('Red'))
 
+    def update_option_menu_button_rect(self):
+        self.music_check_box.rect.width = (self.music_check_box.rect.width * self.res_scale) / self.prev_res_scale
+        self.music_check_box.rect.height = (self.music_check_box.rect.height * self.res_scale)/ self.prev_res_scale
+        self.back_button.rect.width = (self.back_button.rect.width * self.res_scale) / self.prev_res_scale
+        self.back_button.rect.height = (self.back_button.rect.height * self.res_scale) / self.prev_res_scale
+        self.left_arrow.rect.width = (self.left_arrow.rect.width * self.res_scale) / self.prev_res_scale
+        self.left_arrow.rect.height = (self.left_arrow.rect.height * self.res_scale) /self.prev_res_scale
+        self.right_arrow.rect.width = (self.right_arrow.rect.width * self.res_scale) / self.prev_res_scale
+        self.right_arrow.rect.height = (self.right_arrow.rect.height * self.res_scale)/ self.prev_res_scale
+        self.play_b.rect.width = (self.play_b.rect.width * self.res_scale) / self.prev_res_scale
+        self.play_b.rect.height = (self.play_b.rect.height * self.res_scale)/ self.prev_res_scale
+        self.option_b.rect.width = (self.option_b.rect.width * self.res_scale) / self.prev_res_scale
+        self.option_b.rect.height = (self.option_b.rect.height * self.res_scale)/ self.prev_res_scale
+        
+    
     def options_menu(self):
         game_menu:bool = True
         anim_index:int = 0
@@ -348,15 +379,21 @@ class Game():
         update_time_m = self.get_time()
         change = False
 
+        #Text
+        self.font_1 = pygame.font.SysFont('Arial', 30 * self.res_scale)
+        self.music_string = "Music"
+        self.music_txt = self.font_1.render(self.music_string,1,pygame.Color('Red'))
+        self.resolution_string =  str(self.window.get_size()[0])+" x "+str(self.window.get_size()[1])
+        self.resolution_txt = self.font_1.render(self.resolution_string,1,pygame.Color('Red'))
+
 
         #Button instances
-        music_check_box =  CheckBox(100,120, BOTONES_IMGS[11], BOTONES_IMGS[12],True, 0.5)
+        self.music_check_box =  CheckBox(100,120, BOTONES_IMGS[11], BOTONES_IMGS[12],True, 0.5)
+        self.back_button = Boton(10, 250, BOTONES_IMGS[9], 0.5)
+        self.left_arrow = Boton(150, 130,BOTONES_IMGS[14],0.25)
+        self.right_arrow = Boton(320, 130, pygame.transform.flip(BOTONES_IMGS[14],True,False), 0.25)
 
-        #Text
-        font_1 = pygame.font.SysFont('Arial', 30)
-        MUSIC_STRING = "Music"
-        MUSIC_TXT = font_1.render(MUSIC_STRING,1,pygame.Color('Red'))
-
+ 
         # Menu_Loop
         while game_menu:
             #Events: Pygame input
@@ -374,22 +411,51 @@ class Game():
                 #            self.window = pygame.display.set_mode(WINDOW_SIZE,pygame.RESIZABLE)
 
             #All Updates
-            if music_check_box.check_clicked():
-                if music_check_box.state == False:
+            if self.music_check_box.check_clicked():
+                if self.music_check_box.state == False:
                     pygame.mixer.music.stop()
                 else:
                     pygame.mixer.music.play(loops = -1)
+            
+            if self.back_button.check_click():
+                self.play_click_sound()
+                return None
+            
+            if self.left_arrow.check_click():
+                if self.selected_resolution != 0:
+                    self.selected_resolution -= 1
+                    self.prev_res_scale = self.res_scale
+                    self.change_scale()
+                    self.window = pygame.display.set_mode(self.RESOLUTIONS[self.selected_resolution],pygame.RESIZABLE)
+                    self.update_option_menu_button_rect()
+                    
+
+            if self.right_arrow.check_click():
+                if self.selected_resolution != len(self.RESOLUTIONS) - 1:
+                    self.selected_resolution += 1
+                    self.prev_res_scale = self.res_scale
+                    self.change_scale()
+                    self.window = pygame.display.set_mode(self.RESOLUTIONS[self.selected_resolution],pygame.RESIZABLE)
+                    self.update_option_menu_button_rect()
+
+            self.update_text()
 
             # All Draws
+            #print(self.res_scale)
             self.display.blit(pygame.transform.scale(BACKGROUND_ANIM[anim_index], DISPLAY_SIZE), (0, 0))
 
             self.display.blit(self.GAME_TITLE_IMG,(5,5))
             
             self.window.blit(pygame.transform.scale(self.display, self.window.get_size()), (0, 0))
 
-            self.window.blit(MUSIC_TXT, (10, 135))
+            self.window.blit(self.music_txt, (10 * self.res_scale, self.res_scale * 135))
+            self.window.blit(self.resolution_txt, (180 * self.res_scale, self.res_scale * 127))
 
-            music_check_box.draw(self.window)
+            self.music_check_box.draw(self.window, 100 * self.res_scale, 120 * self.res_scale,0.5 * self.res_scale)
+            self.back_button.draw(self.window, 10 * self.res_scale, 250 * self.res_scale, 0.5 * self.res_scale)
+            self.left_arrow.draw(self.window,150 * self.res_scale, 130 * self.res_scale,0.25 * self.res_scale)
+            self.right_arrow.draw(self.window, 320 * self.res_scale , 130 * self.res_scale, 0.25 * self.res_scale)
+
 
             pygame.display.update()
             self.clock.tick(fps)
@@ -447,15 +513,18 @@ class Game():
             # All Draws
             self.display.blit(pygame.transform.scale(BACKGROUND_ANIM[anim_index], DISPLAY_SIZE), (0, 0))
 
-            self.display.blit(self.GAME_TITLE_IMG,(5,5))
             
-            self.window.blit(pygame.transform.scale(self.display, WINDOW_SIZE), (0, 0))
             
-            LEVEL_1.draw(self.window)
-            LEVEL_2.draw(self.window)
-            LEVEL_3.draw(self.window)
-            LEVEL_4.draw(self.window)
-            LEVEL_5.draw(self.window)
+            self.window.blit(pygame.transform.scale(self.display, self.window.get_size()), (0, 0))
+
+            self.window.blit(pygame.transform.scale(self.GAME_TITLE_IMG,(100 * self.res_scale,50 * self.res_scale)),
+                             (5 * self.res_scale,5 * self.res_scale))
+            
+            LEVEL_1.draw(self.window,110 * self.res_scale,10 * self.res_scale,0.4 * self.res_scale)
+            LEVEL_2.draw(self.window,190 * self.res_scale, 10* self.res_scale, 0.4* self.res_scale)
+            LEVEL_3.draw(self.window,270* self.res_scale,10* self.res_scale,0.4* self.res_scale)
+            LEVEL_4.draw(self.window,350* self.res_scale,10* self.res_scale,0.4* self.res_scale)
+            LEVEL_5.draw(self.window,110* self.res_scale, 60* self.res_scale,0.4* self.res_scale)
             
             
             pygame.display.update()
@@ -480,21 +549,38 @@ class Game():
     def dead_menu_draw(self):
         if self.player.dead:
             pygame.draw.rect(self.window, (255, 120, 219),
-                             pygame.Rect(150, 30, 300, 300), 0, 3)
-            self.window.blit(self.DEAD_MESAGE_TXT, (80, 60))
-            self.retry_b.draw(self.window)
-            self.quit_b_dead_menu.draw(self.window)
+                             pygame.Rect(150* self.res_scale, 30* self.res_scale,
+                                          300* self.res_scale, 300* self.res_scale), 0, 3)
+            self.window.blit(self.DEAD_MESAGE_TXT, (80* self.res_scale, 60* self.res_scale))
+            self.retry_b.draw(self.window,270* self.res_scale, 120* self.res_scale, 0.5* self.res_scale)
+            self.quit_b_dead_menu.draw(self.window,270* self.res_scale, 180* self.res_scale, 0.5* self.res_scale)
     #Draw's the entire pause screen(SE)
     def pause_screen_draw(self):
         if self.game_pause:
             pygame.draw.rect(self.window, (255, 120, 219),
-                             pygame.Rect(150, 30, 300, 300), 0, 3)
+                             pygame.Rect(150* self.res_scale, 30* self.res_scale, 
+                                         300* self.res_scale, 300* self.res_scale), 0, 3)
             
-            self.window.blit(self.PAUSE_TEXT,(230,10))
+            self.window.blit(self.PAUSE_TEXT,(230* self.res_scale,10* self.res_scale))
             
-            self.quit_b_pause.draw(self.window)
-            self.retry_b_pause.draw(self.window)
-    
+            self.quit_b_pause.draw(self.window,270* self.res_scale, 180* self.res_scale , 0.5 * self.res_scale)
+            self.retry_b_pause.draw(self.window,270* self.res_scale, 120* self.res_scale, 0.5* self.res_scale)
+
+    def get_resolutions(self):
+        self.RESOLUTIONS = []
+        self.resolution_scales = [0.5]
+        run:bool = True
+        i = 1
+        while run:
+            new_resolution = (DISPLAY_SIZE[0] * i , DISPLAY_SIZE[1] * i)
+            if (new_resolution[0] < self.MONITOR_RESOLUTION[0]) and (new_resolution[1] < self.MONITOR_RESOLUTION[1]):
+                self.RESOLUTIONS.append(new_resolution)
+                i+= 1
+            else:
+                for n in range(1,i-1):
+                    self.resolution_scales.append(n)
+                run = False
+
     #Updates the logic of all the buttons that appear in the pause menu(SE) 
     def pause_screen_logic(self):
         if self.game_pause:
