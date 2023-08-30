@@ -12,6 +12,7 @@ class Game():
         self.running = True
         pygame.init()
         pygame.mixer.init()
+        pygame.mixer.music.set_volume(0.5)
         pygame.display.set_caption(TITLE)
         self.MONITOR_RESOLUTION = (pygame.display.Info().current_w, pygame.display.Info().current_h)
         self.get_resolutions()
@@ -29,14 +30,16 @@ class Game():
         self.texts_2 = []
         self.strings_1 = []
         self.strings_2 = []
+        self.selected_fps = 1
+        self.POSSIBLE_FPS = [30,60,75,90,120,144,1000]
+        self.Fps = self.POSSIBLE_FPS[self.selected_fps]
         self.ASSETS = {}
         self.load_assets()
         self.setup_buttons_and_txt()
         self.LEVELS = self.load_levels()
         pygame.mixer.music.load(self.ASSETS["MUSIC_PATHS"][0])
         pygame.mixer.music.play(loops=-1)
-        self.POSSIBLE_FPS = [30,60,75,90,120,144,165,180,240,1000]
-        self.Fps = self.POSSIBLE_FPS[1]
+
     
     #Start a new game(SE)
     def new_game(self,level:int):
@@ -296,7 +299,13 @@ class Game():
             self.DEAD_MESAGE_STRING = "U dead"
             self.dead_mesage_txt = self.font_1.render(self.DEAD_MESAGE_STRING, 1, pygame.Color('Red'))
             self.MUSIC_STRING = "Music"
+            self.fps_string = "FPS : " + str(self.Fps)
+            self.FULLSCREEN_STRING = "Fullscreen"
+            self.music_volume_string = "Music Volume : " + str(pygame.mixer.music.get_volume())
             self.music_txt = self.font_2.render(self.MUSIC_STRING,1,pygame.Color('Red'))
+            self.fps_txt = self.font_2.render(self.fps_string,1,pygame.Color('Red'))
+            self.fullscreen_txt = self.font_2.render(self.FULLSCREEN_STRING,1,pygame.Color('Red'))
+            self.music_volume_txt = self.font_2.render(self.music_volume_string, 1 ,pygame.Color('Red'))
             self.resolution_string =  str(self.window.get_size()[0])+" x "+str(self.window.get_size()[1])
             self.resolution_txt = self.font_2.render(self.resolution_string,1,pygame.Color('Red'))
 
@@ -317,6 +326,11 @@ class Game():
             self.LEVEL_3:Boton = Boton(403,10,self.ASSETS["BOTONES_IMGS"][3], 0.5)
             self.LEVEL_4:Boton = Boton(500,10,self.ASSETS["BOTONES_IMGS"][4], 0.5)
             self.LEVEL_5:Boton = Boton(211, 60, self.ASSETS["BOTONES_IMGS"][5], 0.5)
+            self.fps_arrow = Boton(190,165,pygame.transform.flip(self.ASSETS["BOTONES_IMGS"][14],True,False), 0.25)
+            self.fullscreen_checkbox = CheckBox(10,210,self.ASSETS["BOTONES_IMGS"][11], self.ASSETS["BOTONES_IMGS"][12],False, 0.5)
+            self.left_music_volume_arrow = Boton(300,240,self.ASSETS["BOTONES_IMGS"][14],0.25)
+            self.right_music_volume_arrow = Boton(390, 240,pygame.transform.flip(self.ASSETS["BOTONES_IMGS"][14],True,False), 0.25)
+
 
             self.buttons.append(self.resume_b)
             self.buttons.append(self.quit_b_pause)
@@ -334,6 +348,11 @@ class Game():
             self.buttons.append(self.LEVEL_3)
             self.buttons.append(self.LEVEL_4)
             self.buttons.append(self.LEVEL_5)
+            self.buttons.append(self.fps_arrow)
+            self.buttons.append(self.fullscreen_checkbox)
+            self.buttons.append(self.left_music_volume_arrow)
+            self.buttons.append(self.right_music_volume_arrow)
+
     #Menu Loop
     def menu_screen(self):
         
@@ -372,7 +391,7 @@ class Game():
             
             
             pygame.display.update()
-            self.clock.tick(fps)
+            self.clock.tick(self.Fps)
             
             if (self.get_time() - update_time_m > MAIN_MENU_ANIM_COOLDOWN):
                 update_time_m = self.get_time()
@@ -394,14 +413,24 @@ class Game():
         
         self.font_2 = self.font_2 = pygame.font.SysFont('Arial', int(30 * self.res_scale))
         self.music_txt = self.font_2.render(self.MUSIC_STRING,1,pygame.Color('Red'))
-
+        self.fullscreen_txt = self.font_2.render(self.FULLSCREEN_STRING,1,pygame.Color('Red'))
+        
+        self.fps_string = "FPS : " + str(self.Fps)
+        self.fps_txt = self.font_2.render(self.fps_string,1,pygame.Color('Red'))
         self.resolution_string =  str(self.window.get_size()[0])+" x "+str(self.window.get_size()[1])
         self.resolution_txt = self.font_2.render(self.resolution_string,1,pygame.Color('Red'))
+        self.music_volume_string = "Music Volume : " + str(round(pygame.mixer.music.get_volume(),1))
+        self.music_volume_txt = self.font_2.render(self.music_volume_string, 1 ,pygame.Color('Red'))
     def update_option_menu_button_rect(self):
         for button in self.buttons:
             button.rect.width = (button.rect.width * self.res_scale)/ self.prev_res_scale
             button.rect.height = (button.rect.height * self.res_scale)/ self.prev_res_scale
-        
+    
+    def change_res(self):
+        if self.fullscreen_checkbox.state == True:
+            self.window = pygame.display.set_mode(self.RESOLUTIONS[self.selected_resolution],pygame.FULLSCREEN)
+        else:
+            self.window = pygame.display.set_mode(self.RESOLUTIONS[self.selected_resolution],pygame.RESIZABLE)
     
     def options_menu(self):
         game_menu:bool = True
@@ -410,6 +439,7 @@ class Game():
         MAIN_MENU_ANIM_COOLDOWN:float =0.09
         update_time_m = self.get_time()
         change = False
+        VOLUME_VALUE = 0.1
 
         # Menu_Loop
         while game_menu:
@@ -443,7 +473,7 @@ class Game():
                     self.selected_resolution -= 1
                     self.prev_res_scale = self.res_scale
                     self.change_scale()
-                    self.window = pygame.display.set_mode(self.RESOLUTIONS[self.selected_resolution],pygame.RESIZABLE)
+                    self.change_res()
                     self.update_option_menu_button_rect()
                     
 
@@ -452,8 +482,35 @@ class Game():
                     self.selected_resolution += 1
                     self.prev_res_scale = self.res_scale
                     self.change_scale()
-                    self.window = pygame.display.set_mode(self.RESOLUTIONS[self.selected_resolution],pygame.RESIZABLE)
+                    self.change_res()
                     self.update_option_menu_button_rect()
+
+            if self.fps_arrow.check_click():
+                if self.selected_fps >= len(self.POSSIBLE_FPS) - 1:
+                    self.selected_fps = 0
+                else:
+                    self.selected_fps += 1
+                
+                self.Fps = self.POSSIBLE_FPS[self.selected_fps]
+            
+            if self.fullscreen_checkbox.check_clicked():
+                if self.fullscreen_checkbox.state == False:
+                    pygame.display.set_mode(self.RESOLUTIONS[self.selected_resolution],pygame.RESIZABLE)
+
+                else:
+                    pygame.display.set_mode(self.RESOLUTIONS[self.selected_resolution],pygame.FULLSCREEN)
+
+            if self.left_music_volume_arrow.check_click():
+                if pygame.mixer.music.get_volume() >= 0.1:
+                    pygame.mixer.music.set_volume(round(pygame.mixer.music.get_volume(),1) - VOLUME_VALUE)
+                else:
+                    pygame.mixer.music.set_volume(0)
+
+            if self.right_music_volume_arrow.check_click():
+                if pygame.mixer.music.get_volume() <= 1:
+                    pygame.mixer.music.set_volume(round(pygame.mixer.music.get_volume(),1) + VOLUME_VALUE)
+                else:
+                    pygame.mixer.music.set_volume(1)
 
             self.update_text()
 
@@ -467,15 +524,23 @@ class Game():
 
             self.window.blit(self.music_txt, (10 * self.res_scale, self.res_scale * 135))
             self.window.blit(self.resolution_txt, (180 * self.res_scale, self.res_scale * 127))
+            self.window.blit(self.fps_txt,(10 * self.res_scale, self.res_scale * 165))
+            self.window.blit(self.fullscreen_txt,(10 * self.res_scale, 210 * self.res_scale))
+            self.window.blit(self.music_volume_txt,(10 * self.res_scale, 235 * self.res_scale))
 
             self.music_check_box.draw(self.window, 100 * self.res_scale, 120 * self.res_scale,0.5 * self.res_scale)
-            self.back_button.draw(self.window, 10 * self.res_scale, 250 * self.res_scale, 0.5 * self.res_scale)
+            self.back_button.draw(self.window, 10 * self.res_scale, 310 * self.res_scale, 0.5 * self.res_scale)
             self.left_arrow.draw(self.window,150 * self.res_scale, 130 * self.res_scale,0.25 * self.res_scale)
-            self.right_arrow.draw(self.window, 320 * self.res_scale , 130 * self.res_scale, 0.25 * self.res_scale)
+            self.right_arrow.draw(self.window, 325 * self.res_scale , 130 * self.res_scale, 0.25 * self.res_scale)
+            self.fps_arrow.draw(self.window, 160 * self.res_scale, 170 * self.res_scale, 0.25 * self.res_scale)
+            self.fullscreen_checkbox.draw(self.window,155 * self.res_scale, 194 * self.res_scale, 0.5 * self.res_scale)
+            self.left_music_volume_arrow.draw(self.window, 270 * self.res_scale, 240 * self.res_scale, 0.25 * self.res_scale)
+            self.right_music_volume_arrow.draw(self.window,300 * self.res_scale, 240 * self.res_scale, 0.25 * self.res_scale)
+            
 
 
             pygame.display.update()
-            self.clock.tick(fps)
+            self.clock.tick(self.Fps)
             
             if (self.get_time() - update_time_m > MAIN_MENU_ANIM_COOLDOWN):
                 update_time_m = self.get_time()
@@ -591,7 +656,12 @@ class Game():
                 i+= 1
             else:
                 for n in range(1,i-1):
-                    self.resolution_scales.append(n)
+                    if n == 2:
+                        self.resolution_scales.append(1.5)
+                    else:
+                        self.resolution_scales.append(n)
+                self.RESOLUTIONS.append(self.MONITOR_RESOLUTION)
+                self.resolution_scales.append(2)
                 run = False
 
     #Updates the logic of all the buttons that appear in the pause menu(SE) 
