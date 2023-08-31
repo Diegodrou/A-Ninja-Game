@@ -19,7 +19,7 @@ class Game():
         self.selected_resolution = 1
         self.res_scale = 1
         self.prev_res_scale = self.res_scale
-
+        self.aqui = False
         self.window = pygame.display.set_mode((self.RESOLUTIONS[self.selected_resolution][0], 
                                                self.RESOLUTIONS[self.selected_resolution][1]),pygame.RESIZABLE)
         self.display = pygame.Surface(DISPLAY_SIZE)
@@ -44,8 +44,9 @@ class Game():
     #Start a new game(SE)
     def new_game(self,level:int):
         self.retry_game = True
-        pygame.mixer.music.load(self.ASSETS["MUSIC_PATHS"][level])
-        pygame.mixer.music.play(loops=-1)
+        if self.music_check_box.state == True:
+            pygame.mixer.music.load(self.ASSETS["MUSIC_PATHS"][level])
+            pygame.mixer.music.play(loops=-1)
         while self.retry_game:
             #All sprite Groups
             self.all_sprites = pygame.sprite.Group()
@@ -65,7 +66,11 @@ class Game():
             self.camera = Camera(WINDOW_WIDTH, WINDOW_HEIGHT, map, self, DISPLAY_SIZE)
             self.setup_level(map.data,map.pixelWidth)
             
-            self.run()
+            if level != -1:
+                self.run()
+            else:
+                self.running = False
+                quit()
     
     #Game Loop
     def run(self):
@@ -224,7 +229,9 @@ class Game():
         self.dead_menu_draw()
 
         pygame.display.update()
-    
+        if self.aqui:
+            time.sleep(2)
+            self.aqui = False
     #Draws all sprites(SE)
     def draw_sprites(self):
         #for sprite in self.all_sprites:
@@ -330,6 +337,7 @@ class Game():
             self.fullscreen_checkbox = CheckBox(10,210,self.ASSETS["BOTONES_IMGS"][11], self.ASSETS["BOTONES_IMGS"][12],False, 0.5)
             self.left_music_volume_arrow = Boton(300,240,self.ASSETS["BOTONES_IMGS"][14],0.25)
             self.right_music_volume_arrow = Boton(390, 240,pygame.transform.flip(self.ASSETS["BOTONES_IMGS"][14],True,False), 0.25)
+            self.quit_main_menu = Boton(10,220,self.ASSETS["BOTONES_IMGS"][6],0.5)
 
 
             self.buttons.append(self.resume_b)
@@ -379,6 +387,11 @@ class Game():
                 self.play_click_sound()
                 self.options_menu()
 
+            if self.quit_main_menu.check_click():
+                self.play_click_sound()
+                return -1
+                
+
             # All Draws
             self.display.blit(pygame.transform.scale(BACKGROUND_ANIM[anim_index], DISPLAY_SIZE), (0, 0))
 
@@ -388,6 +401,7 @@ class Game():
             
             self.play_b.draw(self.window,10 * self.res_scale ,120 * self.res_scale, 0.5 * self.res_scale)
             self.option_b.draw(self.window,10 * self.res_scale, self.res_scale * 180,self.res_scale * 0.5)
+            self.quit_main_menu.draw(self.window, 10 * self.res_scale, 240 * self.res_scale, 0.5 * self.res_scale)
             
             
             pygame.display.update()
@@ -689,14 +703,14 @@ class Game():
         #self.window.blit(self.show_player_jumping_b_timer(),(10,190))
         #self.window.blit(self.show_player_Jkey_pressed(),(10,220))
         #self.window.blit(self.show_player_anim_index(),(10,250))
-        self.window.blit(self.show_camera_pos(),(10,280))
+        #self.window.blit(self.show_camera_pos(),(10,280))
         #self.window.blit(self.show_tresholds_pos(),(10,310))
         #self.window.blit(self.show_player_left_and_right_pos(),(10,340))
-        self.window.blit(self.show_scroll_amount(),(10,370))
+        #self.window.blit(self.show_scroll_amount(),(10,370))
         
 
     def update_fps(self):
-        font = pygame.font.SysFont("Arial",18)
+        font = pygame.font.SysFont("Arial",int(18 * self.res_scale))
         fps = str(int(self.clock.get_fps()))
         fps_text = font.render(fps, 1, pygame.Color("coral"))
         return fps_text
@@ -885,4 +899,5 @@ while G.running:
     G.new_game(G.menu_screen())
 
 pygame.quit()
+quit()
 
