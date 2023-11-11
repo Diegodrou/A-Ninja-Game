@@ -695,7 +695,7 @@ class Game():
         #self.camera.show_thresholds(self.window)
         self.window.blit(self.update_fps(),(10,10))
         #self.window.blit(self.show_playerMoveVector(),(10,30))
-        #self.window.blit(self.show_DeltaTime(),(10,50))
+        self.window.blit(self.show_DeltaTime(),(10,50))
         #self.window.blit(self.show_player_pos(),(10,70))
         #self.window.blit(self.show_player_on_ground(),(10,100))
         #self.window.blit(self.show_player_air_timer(),(10,130))
@@ -703,10 +703,10 @@ class Game():
         #self.window.blit(self.show_player_jumping_b_timer(),(10,190))
         #self.window.blit(self.show_player_Jkey_pressed(),(10,220))
         #self.window.blit(self.show_player_anim_index(),(10,250))
-        #self.window.blit(self.show_camera_pos(),(10,280))
+        self.window.blit(self.show_camera_pos(),(10,280))
         #self.window.blit(self.show_tresholds_pos(),(10,310))
         #self.window.blit(self.show_player_left_and_right_pos(),(10,340))
-        #self.window.blit(self.show_scroll_amount(),(10,370))
+        self.window.blit(self.show_scroll_amount(),(10,370))
         
 
     def update_fps(self):
