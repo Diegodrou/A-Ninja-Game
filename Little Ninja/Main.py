@@ -31,7 +31,7 @@ class Game():
         self.strings_1 = []
         self.strings_2 = []
         self.selected_fps = 1
-        self.POSSIBLE_FPS = [30,60,75,90,120,144,1000]
+        self.POSSIBLE_FPS = [30,60]
         self.Fps = self.POSSIBLE_FPS[self.selected_fps]
         self.ASSETS = {}
         self.load_assets()
