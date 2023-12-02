@@ -375,8 +375,8 @@ class Enemy(pygame.sprite.Sprite):
     def player_in_range(self):
         player_rect_left = (self.game.player.rect.left <= self.rect.centerx + self.VISION_RANGE) and (self.game.player.rect.left >= self.rect.centerx - self.VISION_RANGE)
         player_rect_right = (self.game.player.rect.right >= self.rect.centerx - self.VISION_RANGE) and (self.game.player.rect.right <= self.rect.centerx + self.VISION_RANGE)
-        player_rect_bottom = self.game.player.rect.bottom >= self.rect.top
-
+        player_rect_bottom = (self.game.player.rect.bottom >= self.rect.top) and (self.game.player.rect.top <= self.rect.bottom)
+        
 
         player_in_range_bool = (player_rect_left or player_rect_right) and player_rect_bottom
         if player_in_range_bool:
