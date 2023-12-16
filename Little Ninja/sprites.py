@@ -321,7 +321,7 @@ class Enemy(pygame.sprite.Sprite):
         self.rect = pygame.Rect((1000,0), (18, 24))#100 to fix a bullet spawning bug
         self.flip = False
         self.ENEMY_ANIMATION_COOLDOWN = 125
-        self.SHOOTING_COOLDOWN = 350
+        self.SHOOTING_COOLDOWN = 400
         self.update_time = pygame.time.get_ticks()
         self.shooting_update_time = pygame.time.get_ticks()
         self.REACTION_COOLDOWN = 250
@@ -339,7 +339,7 @@ class Enemy(pygame.sprite.Sprite):
 
         # Other player attributes
         self.dead = False
-        self.VISION_RANGE = 100
+        self.VISION_RANGE = 80
         self.animation_state:str = self.ANIMATION_TYPES[0]
         self.logic_state :str = self.ENEMY_STATES[0]
         self.player_is_to_the_right = False
@@ -667,7 +667,7 @@ class AttackSprite(pygame.sprite.Sprite):
         #The class constructor (__init__ method) takes an argument of a Group (or list of Groups) the Sprite instance should belong to.
         pygame.sprite.Sprite.__init__(self,self.groups)
         self.game = game_attributes
-        self.image = pygame.Surface((5,10))
+        self.image = pygame.Surface((13,10))
         self.image.fill((0,255,0))
         self.dir = direction
         self.rect = self.set_rect_direction(direction)
@@ -678,16 +678,16 @@ class AttackSprite(pygame.sprite.Sprite):
     #-> returns a Rect object thats either gonna be to the left or the right of the player depending on the direction
     def set_rect_direction(self,dir):
         if dir == "left":
-            return self.image.get_rect(right = self.game.player.rect.left)
+            return self.image.get_rect(right = self.game.player.rect.centerx)
         elif dir == "right":
-            return self.image.get_rect(left = self.game.player.rect.right)
+            return self.image.get_rect(left = self.game.player.rect.centerx)
     
     #Updates the attackSprite Logic(SE)
     def update(self):
         if self.dir == "left":
-            self.rect.right = self.game.player.rect.left
+            self.rect.right = self.game.player.rect.centerx
         elif self.dir == "right":
-            self.rect.left = self.game.player.rect.right
+            self.rect.left = self.game.player.rect.centerx
         self.rect.y = self.game.player.rect.y
 
         if not self.game.player.attack:
