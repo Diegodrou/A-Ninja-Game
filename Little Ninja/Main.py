@@ -37,6 +37,8 @@ class Game():
         self.load_assets()
         self.setup_buttons_and_txt()
         self.LEVELS = self.load_levels()
+        self.ui_txt_size = 22
+        self.ui_font = pygame.font.SysFont('Arial',int(self.ui_txt_size * self.res_scale))
         pygame.mixer.music.load(self.ASSETS["MUSIC_PATHS"][0])
         pygame.mixer.music.play(loops=-1)
 
@@ -62,9 +64,13 @@ class Game():
 
             
             #More game setup stuff
+            
             map = Map(self.LEVELS[level])
             self.camera = Camera(WINDOW_WIDTH, WINDOW_HEIGHT, map, self, DISPLAY_SIZE)
             self.setup_level(map.data,map.pixelWidth)
+            self.nb_of_enemies_max:int = self.countEnemies()
+            self.nb_enemies_killed:int = 0
+
             
             if level != -1:
                 self.run()
@@ -86,6 +92,9 @@ class Game():
             self.draw()
             self.clock.tick(self.Fps)
     
+    def countEnemies(self):
+        return self.all_enemies.__len__()
+
     #Game Loop: - Events(SE)
     def events(self):
         for event in pygame.event.get():
@@ -219,12 +228,18 @@ class Game():
         self.draw_sprites()
         
         
+        
         #Things drawn in the window
         self.window.blit(pygame.transform.scale(self.display, self.window.get_size()), (0, 0))
+        
+        #UI
+        self.window.blit(self.draw_enemy_killed_counter(),(10,1))
         
         if self.debug_on:
             self.debug()
         
+        
+        #menus
         self.pause_screen_draw()
         self.dead_menu_draw()
 
@@ -280,7 +295,10 @@ class Game():
                 if self.layer_data[i][0] > DISPLAY_SIZE[0]:
                     self.layer_data[i][0] = self.layer_data[i][1]
 
-        
+    def draw_enemy_killed_counter(self):
+        txt:str= "Enemies left: " + str(self.nb_of_enemies_max - self.nb_enemies_killed)
+        txt_surface = self.ui_font.render(txt,1, pygame.Color('Red'))
+        return txt_surface
 
     #Gets current time
     def get_time(self):
@@ -418,6 +436,7 @@ class Game():
         for resolution in range(len(self.RESOLUTIONS)):
             if self.selected_resolution == resolution:
                 self.res_scale = self.resolution_scales[resolution]
+        self.ui_font = pygame.font.SysFont('Arial',int(self.ui_txt_size * self.res_scale))
     
     def update_text(self):
         self.font_1 = pygame.font.SysFont('Arial',int(60 * self.res_scale))

@@ -545,6 +545,7 @@ class Enemy(pygame.sprite.Sprite):
     def check_if_dead(self):
         hits = pygame.sprite.spritecollideany(self,self.game.attack_sprite)
         if hits:
+            self.game.nb_enemies_killed+=1
             self.kill() 
 
     #Draws the enemy sprite(SE)
