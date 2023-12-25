@@ -41,11 +41,14 @@ class Game():
         self.ui_font = pygame.font.SysFont('Arial',int(self.ui_txt_size * self.res_scale))
         pygame.mixer.music.load(self.ASSETS["MUSIC_PATHS"][0])
         pygame.mixer.music.play(loops=-1)
+        self.win = False
 
     
     #Start a new game(SE)
     def new_game(self,level:int):
         self.retry_game = True
+        self.win = False
+        self.current_lvl = level
         if self.music_check_box.state == True:
             pygame.mixer.music.load(self.ASSETS["MUSIC_PATHS"][level])
             pygame.mixer.music.play(loops=-1)
@@ -143,14 +146,15 @@ class Game():
         #Game Loop: - Update
         if not self.player.dead:
             if not self.game_pause:
-                self.enemy_sprite_count_before = self.update_enemy_sprite_count()
-                self.update_sprites()
-                self.enemy_sprite_count_after = self.update_enemy_sprite_count()
-                self.camera.update(self.player)
-                self.update_bg_layers_positions()
-                self.play_sounds()
-                
-        
+                if not self.win:
+                    self.enemy_sprite_count_before = self.update_enemy_sprite_count()
+                    self.update_sprites()
+                    self.enemy_sprite_count_after = self.update_enemy_sprite_count()
+                    self.camera.update(self.player)
+                    self.update_bg_layers_positions()
+                    self.play_sounds()
+                    self.check_win()
+                self.win_menu_logic()
             self.pause_screen_logic()
         self.dead_menu_logic()
 
@@ -240,6 +244,7 @@ class Game():
         
         
         #menus
+        self.draw_win_menu()
         self.pause_screen_draw()
         self.dead_menu_draw()
 
@@ -300,6 +305,10 @@ class Game():
         txt_surface = self.ui_font.render(txt,1, pygame.Color('Red'))
         return txt_surface
 
+    def check_win(self):
+        if (self.nb_of_enemies_max - self.nb_enemies_killed) == 0:
+            self.win = True
+
     #Gets current time
     def get_time(self):
         return time.time()
@@ -326,6 +335,8 @@ class Game():
             self.MUSIC_STRING = "Music"
             self.fps_string = "FPS : " + str(self.Fps)
             self.FULLSCREEN_STRING = "Fullscreen"
+            self.WIN_STRING = "U WIN!!!"
+            self.win_message_txt = self.font_1.render(self.WIN_STRING,1,pygame.Color('Red'))
             self.music_volume_string = "Music Volume : " + str(pygame.mixer.music.get_volume())
             self.music_txt = self.font_2.render(self.MUSIC_STRING,1,pygame.Color('Red'))
             self.fps_txt = self.font_2.render(self.fps_string,1,pygame.Color('Red'))
@@ -356,6 +367,8 @@ class Game():
             self.left_music_volume_arrow = Boton(300,240,self.ASSETS["BOTONES_IMGS"][14],0.25)
             self.right_music_volume_arrow = Boton(390, 240,pygame.transform.flip(self.ASSETS["BOTONES_IMGS"][14],True,False), 0.25)
             self.quit_main_menu = Boton(10,220,self.ASSETS["BOTONES_IMGS"][6],0.5)
+            self.quit_win_menu = Boton(270, 180, self.ASSETS["BOTONES_IMGS"][6], 0.5)
+            self.next_level_arrow = Boton(270,120,self.ASSETS["BOTONES_IMGS"][13],0.5)
 
 
             self.buttons.append(self.resume_b)
@@ -442,6 +455,7 @@ class Game():
         self.font_1 = pygame.font.SysFont('Arial',int(60 * self.res_scale))
         self.dead_mesage_txt = self.font_1.render(self.DEAD_MESAGE_STRING, 1, pygame.Color('Red'))
         self.pause_text = self.font_1.render(self.PAUSE_STRING, 1, pygame.Color('Red'))
+        self.win_message_txt = self.font_1.render(self.WIN_STRING, 1, pygame.Color('Red'))
 
         
         self.font_2 = self.font_2 = pygame.font.SysFont('Arial', int(30 * self.res_scale))
@@ -676,6 +690,30 @@ class Game():
             
             self.quit_b_pause.draw(self.window,270* self.res_scale, 180* self.res_scale , 0.5 * self.res_scale)
             self.retry_b_pause.draw(self.window,270* self.res_scale, 120* self.res_scale, 0.5* self.res_scale)
+
+    def draw_win_menu(self):
+        if self.win:
+            pygame.draw.rect(self.window, (255, 120, 219),
+                             pygame.Rect(150* self.res_scale, 30* self.res_scale,
+                                          300* self.res_scale, 300* self.res_scale), 0, 3)
+            self.window.blit(self.win_message_txt, (80* self.res_scale, 60* self.res_scale))
+            self.next_level_arrow.draw(self.window, 270*self.res_scale, 120*self.res_scale, 0.5 * self.res_scale)
+            self.quit_win_menu.draw(self.window,270* self.res_scale, 180* self.res_scale , 0.5 * self.res_scale)
+    
+    def win_menu_logic(self):
+        if self.win:
+            if self.next_level_arrow.check_click():
+                self.play_click_sound() 
+                self.playing = False
+                self.retry_game = False
+                if (self.current_lvl+1) != 6:
+                    self.new_game(self.current_lvl+1)
+            if self.quit_win_menu.check_click():
+                self.play_click_sound() 
+                self.playing = False
+                self.retry_game = False
+                
+
 
     def get_resolutions(self):
         self.RESOLUTIONS = []
