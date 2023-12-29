@@ -663,6 +663,12 @@ class Game():
                     anim_index += 1 
     def dead_menu_logic(self):
         if self.player.dead:
+            ##############################Selecting retry without clicking the button
+            keys = pygame.key.get_pressed()
+
+            if keys[K_SPACE]:
+                self.playing = False
+            #############################
             if self.retry_b.check_click():
                 self.play_click_sound()
                 self.playing = False
@@ -670,6 +676,8 @@ class Game():
                 self.play_click_sound()
                 self.playing = False
                 self.retry_game = False
+
+            
 
     def dead_menu_draw(self):
         if self.player.dead:
@@ -702,6 +710,16 @@ class Game():
     
     def win_menu_logic(self):
         if self.win:
+            ##############################Selecting retry without clicking the button
+            keys = pygame.key.get_pressed()
+
+            if keys[K_SPACE]:
+                self.play_click_sound() 
+                self.playing = False
+                self.retry_game = False
+                if (self.current_lvl+1) != 6:
+                    self.new_game(self.current_lvl+1)
+            #############################
             if self.next_level_arrow.check_click():
                 self.play_click_sound() 
                 self.playing = False
@@ -738,6 +756,12 @@ class Game():
     #Updates the logic of all the buttons that appear in the pause menu(SE) 
     def pause_screen_logic(self):
         if self.game_pause:
+            ##############################Selecting retry without clicking the button
+            keys = pygame.key.get_pressed()
+
+            if keys[K_SPACE]:
+                self.playing = False
+            #############################
             if self.quit_b_pause.check_click():
                 self.play_click_sound()
                 self.playing = False
