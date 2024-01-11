@@ -5,6 +5,7 @@ from sprites import *
 from boton import *
 from map import Map
 from camera import Camera
+import sys
 
 class Game():
     def __init__(self):
@@ -79,7 +80,7 @@ class Game():
                 self.run()
             else:
                 self.running = False
-                quit()
+                sys.exit(0)
     
     #Game Loop
     def run(self):
@@ -406,7 +407,7 @@ class Game():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-                    exit()
+                    sys.exit(0)
                
 
             #All Updates
@@ -494,7 +495,7 @@ class Game():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-                    exit()
+                    sys.exit(0)
 
                 if event.type == KEYDOWN:
                     if event.key == K_r:
@@ -615,7 +616,7 @@ class Game():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-                    exit()
+                    sys.exit(0)
 
             #All Updates
             if self.LEVEL_1.check_click() :
@@ -980,5 +981,5 @@ while G.running:
     G.new_game(G.menu_screen())
 
 pygame.quit()
-quit()
+sys.exit(0)
 
