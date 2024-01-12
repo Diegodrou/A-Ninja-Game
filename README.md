@@ -15,7 +15,6 @@ How to play:
 
 Game credits:
     Programming by : NoIdea
-    Game art by : - NoIdea
-                  - DezrasDragons
+    Game art by : NoIdea ,OpenGameArt and other free art sources that I don't remember
 
     Music by: Panda Beats
