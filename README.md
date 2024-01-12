@@ -8,6 +8,6 @@ I started the project because I wanted to learn to code with python and I though
 How to play:Press f to attack, press space to restart or to load the next level(when in a menu screen), press the left arrow key to go left, press the right arrow key to go right, press the up arrow key to jump.
 
 Credits:
-Game art by : NoIdea ,OpenGameArt and other free art sources that I don't remember
-Music by: Panda Beats
+<br>Game art by : NoIdea ,OpenGameArt and other free art sources that I don't remember
+<br>Music by: Panda Beats
 
