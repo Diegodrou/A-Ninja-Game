@@ -328,7 +328,7 @@ class Game():
     
     def setup_buttons_and_txt(self):
             self.font_1 = pygame.font.SysFont('Arial', 60)
-            self.font_2 = pygame.font.SysFont('Arial', 30 * self.res_scale)
+            self.font_2 = pygame.font.SysFont('Arial', int(30 * self.res_scale))
             self.PAUSE_STRING = "PAUSED"
             self.pause_text = self.font_1.render(self.PAUSE_STRING, 1, pygame.Color('Red'))
             self.DEAD_MESAGE_STRING = "U dead"
